@@ -16,8 +16,6 @@ jobs:
         uses: mangs/super-cache-action@v3
       - if: steps.super-cache.outputs.cache-hit != 'true'
         run: npm ci
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
 
       # Task execution
       - run: npm run validate:environment
