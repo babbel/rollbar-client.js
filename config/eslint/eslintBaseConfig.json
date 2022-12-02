@@ -1,0 +1,56 @@
+{
+  "plugins": [
+    "eslint-plugin-eslint-comments",
+    "eslint-plugin-import",
+    "eslint-plugin-regexp",
+    "eslint-plugin-unicorn"
+  ],
+  "extends": [
+    "eslint-config-airbnb-base",
+    "plugin:eslint-comments/recommended",
+    "plugin:import/recommended",
+    "plugin:regexp/recommended",
+    "plugin:unicorn/recommended"
+  ],
+  "reportUnusedDisableDirectives": true,
+  "env": {
+    "browser": false,
+    "es2022": true,
+    "node": false
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "impliedStrict": true
+    },
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "rules": {
+    "curly": ["error", "all"],
+    "eslint-comments/no-unused-disable": "error",
+    "eslint-comments/require-description": "error",
+    "import/extensions": ["error", "ignorePackages"],
+    "import/no-default-export": "error",
+    "import/prefer-default-export": "off",
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          ["builtin", "external"],
+          ["internal", "unknown", "parent", "sibling", "index", "object", "type"]
+        ],
+        "newlines-between": "always"
+      }
+    ],
+    "no-console": "error",
+    "no-restricted-syntax": "off",
+    "no-use-before-define": ["error", { "functions": false }],
+    "require-await": "error",
+    "sort-keys": "error",
+    "sort-vars": "error",
+    "unicorn/filename-case": ["error", { "case": "camelCase" }],
+    "unicorn/numeric-separators-style": ["error", { "number": { "minimumDigits": 0 } }],
+    "unicorn/relative-url-style": ["error", "always"],
+    "unicorn/switch-case-braces": ["error", "avoid"]
+  }
+}
