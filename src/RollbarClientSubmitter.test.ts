@@ -1,9 +1,10 @@
 // External Imports
-import ErrorStackParser from 'error-stack-parser';
+import * as ErrorStackParser from 'error-stack-parser';
 
 // Internal Imports
-import { RollbarClientSubmitter } from './RollbarClientSubmitter.js';
 import { name as expectedlibraryName, version as expectedlibraryVersion } from '../package.json';
+import { RollbarClientSubmitter } from './RollbarClientSubmitter.js';
+import type { IPayload } from './interfaces';
 
 // Local Variables
 const acceptedLogLevels = ['critical', 'debug', 'error', 'info', 'warning'];
@@ -14,7 +15,7 @@ const minimalCorrectConfig = { accessToken: 'abc123', environment: 'test' };
 class TestCustomError extends RangeError {}
 
 // Local Functions
-function buildMinimalPayload() {
+function buildMinimalPayload(): IPayload {
   const { accessToken, environment } = minimalCorrectConfig;
   return {
     access_token: accessToken,
@@ -51,7 +52,7 @@ function buildMinimalPayload() {
 
 function fetchMock() {}
 
-function getStackFrames(error) {
+function getStackFrames(error: Error) {
   return ErrorStackParser.parse(error).map((frame) => ({
     colno: frame.columnNumber,
     filename: frame.fileName,
@@ -85,7 +86,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
 
   describe('Error occurrence submission', () => {
     // Setup lifecycle behavior
-    let submitter;
+    let submitter = new RollbarClientSubmitter(minimalCorrectConfig);
 
     beforeAll(() => {
       jest.spyOn(console, 'debug').mockImplementation().mockName('consoleDebugMock');
@@ -617,6 +618,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             level,
             notifier,
             platform,
+            // @ts-ignore this field is necessary for this test
             some,
             title: testMessage,
           };
@@ -637,6 +639,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
 
           // eslint-disable-next-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
           const { access_token, data } = buildMinimalPayload();
+          // @ts-ignore deleting this field is part of the test, so this action is unavoidable
           delete data.body;
           const payload = {
             access_token, // eslint-disable-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
@@ -651,6 +654,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             },
             data: {
               arr: [1, { two: 'three' }, 4],
+              // @ts-ignore creating badly-sorted data is part of this test, TS has to be ignored here
               body: {
                 message: {
                   body: testMessage,
@@ -988,6 +992,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
 
       test('sendBeacon() is unavailable, fallback to fetch()', () => {
         const sendBeaconBackup = navigator.sendBeacon;
+        // @ts-ignore deleting a non-optional operand is necessary for this test condition
         delete navigator.sendBeacon;
 
         const testErrorMessage = 'test reference error';

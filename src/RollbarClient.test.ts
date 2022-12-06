@@ -1,5 +1,6 @@
 // Internal Imports
 import { RollbarClient } from './RollbarClient.js';
+import type { IConfigurationOptions } from './interfaces';
 
 // Module Mocks
 const mockReport = jest.fn();
@@ -17,7 +18,7 @@ describe(`Class: ${RollbarClient.name}`, () => {
 
   describe('Class instantiation and event listener attachment', () => {
     test('default behavior', () => {
-      const configuration = {};
+      const configuration: IConfigurationOptions = { accessToken: 'abc123', environment: 'test' };
       const client = new RollbarClient(configuration);
       client.initializeEventListeners();
 
@@ -31,7 +32,11 @@ describe(`Class: ${RollbarClient.name}`, () => {
     });
 
     test('"error" listener disabled', () => {
-      const configuration = { onUnhandledError: false };
+      const configuration: IConfigurationOptions = {
+        accessToken: 'abc123',
+        environment: 'test',
+        onUnhandledError: false,
+      };
       const client = new RollbarClient(configuration);
       client.initializeEventListeners();
 
@@ -44,7 +49,11 @@ describe(`Class: ${RollbarClient.name}`, () => {
     });
 
     test('"unhandledrejection" listener disabled', () => {
-      const configuration = { onUnhandledPromiseRejection: false };
+      const configuration: IConfigurationOptions = {
+        accessToken: 'abc123',
+        environment: 'test',
+        onUnhandledPromiseRejection: false,
+      };
       const client = new RollbarClient(configuration);
       client.initializeEventListeners();
 
@@ -53,7 +62,12 @@ describe(`Class: ${RollbarClient.name}`, () => {
     });
 
     test('both listener types disabled', () => {
-      const configuration = { onUnhandledError: false, onUnhandledPromiseRejection: false };
+      const configuration: IConfigurationOptions = {
+        accessToken: 'abc123',
+        environment: 'test',
+        onUnhandledError: false,
+        onUnhandledPromiseRejection: false,
+      };
       const client = new RollbarClient(configuration);
       client.initializeEventListeners();
 
@@ -62,7 +76,7 @@ describe(`Class: ${RollbarClient.name}`, () => {
 
     test('"error" listener override, "unhandledrejection" listener default', () => {
       const onUnhandledError = jest.fn();
-      const configuration = { onUnhandledError };
+      const configuration = { accessToken: 'abc123', environment: 'test', onUnhandledError };
       const client = new RollbarClient(configuration);
       client.initializeEventListeners();
 
@@ -77,7 +91,11 @@ describe(`Class: ${RollbarClient.name}`, () => {
 
     test('"error" listener default, "unhandledrejection" listener override', () => {
       const onUnhandledPromiseRejection = jest.fn();
-      const configuration = { onUnhandledPromiseRejection };
+      const configuration = {
+        accessToken: 'abc123',
+        environment: 'test',
+        onUnhandledPromiseRejection,
+      };
       const client = new RollbarClient(configuration);
       client.initializeEventListeners();
 
@@ -93,7 +111,12 @@ describe(`Class: ${RollbarClient.name}`, () => {
     test('both listener types overridden', () => {
       const onUnhandledError = jest.fn();
       const onUnhandledPromiseRejection = jest.fn();
-      const configuration = { onUnhandledError, onUnhandledPromiseRejection };
+      const configuration = {
+        accessToken: 'abc123',
+        environment: 'test',
+        onUnhandledError,
+        onUnhandledPromiseRejection,
+      };
       const client = new RollbarClient(configuration);
       client.initializeEventListeners();
 
@@ -109,7 +132,7 @@ describe(`Class: ${RollbarClient.name}`, () => {
 
   describe('Event listener firing', () => {
     test('default behavior', () => {
-      const configuration = {};
+      const configuration = { accessToken: 'abc123', environment: 'test' };
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
@@ -127,7 +150,7 @@ describe(`Class: ${RollbarClient.name}`, () => {
 
     test('"error" listener override, "unhandledrejection" listener default', () => {
       const onUnhandledError = jest.fn();
-      const configuration = { onUnhandledError };
+      const configuration = { accessToken: 'abc123', environment: 'test', onUnhandledError };
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
@@ -146,7 +169,11 @@ describe(`Class: ${RollbarClient.name}`, () => {
 
     test('"error" listener default, "unhandledrejection" listener override', () => {
       const onUnhandledPromiseRejection = jest.fn();
-      const configuration = { onUnhandledPromiseRejection };
+      const configuration = {
+        accessToken: 'abc123',
+        environment: 'test',
+        onUnhandledPromiseRejection,
+      };
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
@@ -166,7 +193,12 @@ describe(`Class: ${RollbarClient.name}`, () => {
     test('both listener types overridden', () => {
       const onUnhandledError = jest.fn();
       const onUnhandledPromiseRejection = jest.fn();
-      const configuration = { onUnhandledError, onUnhandledPromiseRejection };
+      const configuration = {
+        accessToken: 'abc123',
+        environment: 'test',
+        onUnhandledError,
+        onUnhandledPromiseRejection,
+      };
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
@@ -187,7 +219,7 @@ describe(`Class: ${RollbarClient.name}`, () => {
 
   describe('RollbarClientSubmitter usage via this.log()', () => {
     test('correct behavior', async () => {
-      const configuration = {};
+      const configuration = { accessToken: 'abc123', environment: 'test' };
       const client = new RollbarClient(configuration);
       const testError = new Error('unexpected thing happened');
       const applicationState = { one: 'two', other: 'thing' };
