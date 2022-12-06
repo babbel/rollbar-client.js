@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "es2022",
+    "target": "es2022"
+  },
+  "exclude": ["build", "dist", "node_modules"],
+  "typeAcquisition": {
+    "include": ["jest"]
+  }
+}
