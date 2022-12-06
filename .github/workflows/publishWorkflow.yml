@@ -20,9 +20,9 @@ jobs:
       # Task execution
       - run: npm run validate:environment
       - run: npm run build:only
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
+      # - run: npm publish
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ github.token }}
       - uses: mangs/simple-release-notes-action@v2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
