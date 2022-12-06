@@ -1,6 +1,6 @@
-# NPM module `@lessonnine/rollbar-client.js`
+# NPM module `@babbel/rollbar-client.js`
 
-Tiny, modern Rollbar JavaScript client whose code is mostly lazy-loaded if and when an error occurs. Maintained by the [USA Tech team](https://github.com/orgs/lessonnine/teams/usa-tech/members).
+Tiny, modern Rollbar JavaScript client whose code is mostly lazy-loaded if and when an error occurs.
 
 ## Background and Overview
 
@@ -50,16 +50,12 @@ This project was moved into its own repository so it can be shared as an NPM pac
 
 By default, this library should work without any extra configuration. However, because this library uses relative dynamic import paths, HTML `<base>` elements can override the path prefix when fetching dynamic import code; thus, dynamic imports can break. To fix this, use Webpack's `publicPath` configuration option at build time or `__webpack_public_path__` global variable at runtime depending on your environment configuration. You can read more about it [here](https://webpack.js.org/guides/public-path/).
 
-### Production-tested Implementation Example
-
-[prices.spa](https://github.com/lessonnine/prices.spa) usually has the most up-to-date implementation. You can see its implementation here: https://github.com/lessonnine/prices.spa/blob/master/src/index.js
-
 ### Module Exports
 
 Only a single class `RollbarClient` is exported; its usage follows.
 
 ```js
-import { RollbarClient } from "@lessonnine/rollbar-client.js";
+import { RollbarClient } from "@babbel/rollbar-client.js";
 const configurationObject = {
   /* config here */
 };
@@ -134,7 +130,7 @@ function onUnhandledRejectionDefault(promiseRejectionEvent) {
 ### Simulated Implementation
 
 ```js
-import { RollbarClient } from '@lessonnine/rollbar-client.js';
+import { RollbarClient } from '@babbel/rollbar-client.js';
 import { browsersSupportedRegex } from '../constants/regex';
 
 const { environment, geo_data, uuid } = getEnvironmentConfig();
