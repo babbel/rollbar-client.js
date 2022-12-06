@@ -1,0 +1,40 @@
+{
+  "root": true,
+  "extends": ["./config/eslint/eslintBaseConfig.json", "eslint-config-prettier"],
+  "env": {
+    "browser": false,
+    "node": true
+  },
+  "rules": {
+    "no-console": "off"
+  },
+
+  "overrides": [
+    {
+      "files": ["src/**/*.test.js"],
+      "extends": ["./config/eslint/eslintJestConfig.json"]
+    },
+    {
+      "files": ["src/RollbarClient*.js"],
+      "env": {
+        "browser": true
+      },
+      "rules": {
+        "no-console": ["error", { "allow": ["debug", "error", "info", "warn"] }],
+        "unicorn/filename-case": ["error", { "case": "pascalCase" }]
+      }
+    },
+    {
+      "files": ["./src/**/*.test.js"],
+      "rules": {
+        "unicorn/filename-case": "off"
+      }
+    },
+    {
+      "files": ["./config/rollup/rollup.config.mjs"],
+      "rules": {
+        "import/no-extraneous-dependencies": ["error", { "devDependencies": true }]
+      }
+    }
+  ]
+}

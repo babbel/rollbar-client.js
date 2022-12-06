@@ -1,0 +1,8 @@
+.DS_Store
+.env*
+.eslintcache
+.vscode
+build
+dist
+jestCodeCoverage
+node_modules

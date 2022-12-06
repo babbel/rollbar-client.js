@@ -1,0 +1,28 @@
+name: Publish Workflow
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16.17.0"
+          registry-url: https://npm.pkg.github.com
+      - id: super-cache
+        uses: mangs/super-cache-action@v3
+      - if: steps.super-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      # Task execution
+      - run: npm run validate:environment
+      - run: npm run build:only
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{github.token}}
+      - uses: mangs/simple-release-notes-action@v2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
