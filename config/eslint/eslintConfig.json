@@ -1,21 +1,27 @@
 {
   "root": true,
-  "extends": ["./config/eslint/eslintBaseConfig.json", "eslint-config-prettier"],
+  "extends": [
+    "./config/eslint/eslintBaseConfig.json",
+    "./config/eslint/eslintTypescriptConfig.json",
+    "eslint-config-prettier"
+  ],
   "env": {
     "browser": false,
     "node": true
   },
   "rules": {
-    "no-console": "off"
+    "no-console": "off",
+    "@typescript-eslint/lines-between-class-members": "off",
+    "@typescript-eslint/unbound-method": "off"
   },
 
   "overrides": [
     {
-      "files": ["src/**/*.test.js"],
+      "files": ["src/**/*.test.ts"],
       "extends": ["./config/eslint/eslintJestConfig.json"]
     },
     {
-      "files": ["src/RollbarClient*.js"],
+      "files": ["src/RollbarClient*.ts"],
       "env": {
         "browser": true
       },
@@ -25,15 +31,9 @@
       }
     },
     {
-      "files": ["./src/**/*.test.js"],
+      "files": ["./src/**/*.test.ts"],
       "rules": {
         "unicorn/filename-case": "off"
-      }
-    },
-    {
-      "files": ["./config/rollup/rollup.config.mjs"],
-      "rules": {
-        "import/no-extraneous-dependencies": ["error", { "devDependencies": true }]
       }
     }
   ]

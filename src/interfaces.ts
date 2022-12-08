@@ -12,8 +12,8 @@ interface IConfigurationOptions {
   isBrowserSupported?: boolean;
   isVerbose?: boolean;
   locationInfo?: object;
-  onUnhandledError?: (errorEvent: ErrorEvent) => void;
-  onUnhandledPromiseRejection?: (promiseRejectionEvent: PromiseRejectionEvent) => void;
+  onUnhandledError?: false | ((errorEvent: ErrorEvent) => void);
+  onUnhandledPromiseRejection?: false | ((promiseRejectionEvent: PromiseRejectionEvent) => void);
   setContext?: () => string;
   shouldIgnoreOccurrence?: (payload: object, configuration: IConfigurationInternal) => boolean; // TODO: use more specific param types
   userInfo?: object;
@@ -24,17 +24,17 @@ interface IConfigurationInternal {
   apiUrl: string;
   browsersSupportedRegex: RegExp;
   browserUnsupportedTitlePrefix: string;
-  commitHash: string;
-  customPayloadFields: any;
+  commitHash?: string;
+  customPayloadFields?: any;
   environment: string;
-  fingerprint: string | false;
-  hasConfigurationInPayload: boolean;
+  fingerprint?: string | false;
+  hasConfigurationInPayload?: boolean;
   isBrowserSupported: boolean;
   isVerbose: boolean;
-  locationInfo: object;
+  locationInfo?: object;
   setContext: () => string;
   shouldIgnoreOccurrence: (payload: object, configuration: IConfigurationInternal) => boolean; // TODO: use more specific param types
-  userInfo: object;
+  userInfo?: object;
 }
 
 interface IErrorIndexSignature {

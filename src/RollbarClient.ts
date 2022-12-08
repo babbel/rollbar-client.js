@@ -12,11 +12,15 @@ class RollbarClient {
   }
 
   initializeEventListeners() {
-    window.addEventListener('error', this.configuration.onUnhandledError ?? this.onErrorDefault);
-    window.addEventListener(
-      'unhandledrejection',
-      this.configuration.onUnhandledPromiseRejection ?? this.onUnhandledRejectionDefault,
-    );
+    if (this.configuration.onUnhandledError !== false) {
+      window.addEventListener('error', this.configuration.onUnhandledError ?? this.onErrorDefault);
+    }
+    if (this.configuration.onUnhandledPromiseRejection !== false) {
+      window.addEventListener(
+        'unhandledrejection',
+        this.configuration.onUnhandledPromiseRejection ?? this.onUnhandledRejectionDefault,
+      );
+    }
   }
 
   async log(...parameters: TSubmitterParameters) {
@@ -24,16 +28,17 @@ class RollbarClient {
       const { RollbarClientSubmitter } = await import('./RollbarClientSubmitter.js');
       this.submitter = new RollbarClientSubmitter(this.configuration);
     }
-    // @ts-ignore TODO: add more specific typing to this.submitter
     this.submitter.report(...parameters);
   }
 
   onErrorDefault = (errorEvent: ErrorEvent) => {
-    this.log('warning', 'Unhandled error occurred', errorEvent.error);
+    this.log('warning', 'Unhandled error occurred', errorEvent.error).catch(() => {});
   };
 
   onUnhandledRejectionDefault = (promiseRejectionEvent: PromiseRejectionEvent) => {
-    this.log('warning', 'Unhandled promise rejection occurred', promiseRejectionEvent.reason);
+    this.log('warning', 'Unhandled promise rejection occurred', promiseRejectionEvent.reason).catch(
+      () => {},
+    );
   };
 }
 

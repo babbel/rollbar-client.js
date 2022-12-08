@@ -12,7 +12,6 @@
     "browser": false,
     "jest": true,
     "jest/globals": true,
-    "node": false
-  },
-  "rules": {}
+    "node": true
+  }
 }

@@ -4,7 +4,7 @@ import * as ErrorStackParser from 'error-stack-parser';
 // Internal Imports
 import { name as expectedlibraryName, version as expectedlibraryVersion } from '../package.json';
 import { RollbarClientSubmitter } from './RollbarClientSubmitter.js';
-import type { IPayload } from './interfaces';
+import type { IConfigurationOptions, IGenericObjectIndexSignature, IPayload } from './interfaces';
 
 // Local Variables
 const acceptedLogLevels = ['critical', 'debug', 'error', 'info', 'warning'];
@@ -50,7 +50,11 @@ function buildMinimalPayload(): IPayload {
   };
 }
 
-function fetchMock() {}
+const fetchMock = jest.fn(() =>
+  Promise.resolve({
+    json: () => Promise.resolve('test'),
+  }),
+) as jest.Mock;
 
 function getStackFrames(error: Error) {
   return ErrorStackParser.parse(error).map((frame) => ({
@@ -61,9 +65,12 @@ function getStackFrames(error: Error) {
   }));
 }
 
-function sendBeaconMock() {
-  return true;
+function omitFromObject(key: string, object: IGenericObjectIndexSignature) {
+  const { [key]: omitted, ...remaining } = object;
+  return remaining;
 }
+
+const sendBeaconMock = jest.fn(() => true) as jest.Mock;
 
 // Execute Tests
 describe(`Class: ${RollbarClientSubmitter.name}`, () => {
@@ -71,9 +78,12 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
     const requiredKeys = ['accessToken', 'environment'];
     for (const key of requiredKeys) {
       test(`throws when required configuration key "${key}" is missing`, () => {
-        const badConfig = { ...minimalCorrectConfig };
-        delete badConfig[key];
-        expect(() => new RollbarClientSubmitter(badConfig)).toThrow(
+        // TODO: remove this old code when this is verified working
+        // const badConfig = { ...minimalCorrectConfig };
+        // delete badConfig[key];
+
+        const badConfig = omitFromObject(key, minimalCorrectConfig);
+        expect(() => new RollbarClientSubmitter(badConfig as IConfigurationOptions)).toThrow(
           `Configuration key "${key}" is required`,
         );
       });
@@ -98,7 +108,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
       if (typeof window.fetch !== 'function') {
         window.fetch = fetchMock;
       }
-      jest.spyOn(window, 'fetch').mockImplementation(fetchMock).mockName(fetchMock.name);
+      jest.spyOn(window, 'fetch').mockImplementation(fetchMock).mockName('fetchMock');
 
       if (typeof navigator.sendBeacon !== 'function') {
         navigator.sendBeacon = sendBeaconMock;
@@ -106,7 +116,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
       jest
         .spyOn(navigator, 'sendBeacon')
         .mockImplementation(sendBeaconMock)
-        .mockName(sendBeaconMock.name);
+        .mockName('sendBeaconMock');
     });
 
     beforeEach(() => {
@@ -121,31 +131,33 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
     describe('Validate input arguments: validateReportArgs()', () => {
       describe('All correct log levels are accepted', () => {
         for (const logLevel of acceptedLogLevels) {
-          // eslint-disable-next-line no-loop-func -- "submitter" is block scoped, so this appears to be a false alarm
+          // eslint-disable-next-line no-loop-func, @typescript-eslint/no-loop-func -- "submitter" is block scoped, so this appears to be a false alarm
           test(`${logLevel}`, () => {
-            expect(() => submitter.report(logLevel)).not.toThrow();
+            expect(() => submitter.report(logLevel, 'test message')).not.toThrow();
           });
         }
       });
 
       describe('Expected errors', () => {
         test('incorrect log level', () => {
-          expect(() => submitter.report('magic')).toThrow(
+          expect(() => submitter.report('magic', 'test message')).toThrow(
             'Log level can only be one of the following: critical, debug, error, info, warning',
           );
         });
 
         test('error object is not an instance of class "Error"', () => {
           expect(() =>
-            submitter.report('error', 'test message', { error: 'bad thing happened' }),
+            submitter.report('error', 'test message', new Error('bad thing happened')),
           ).toThrow('Error objects must be an instance of class "Error"');
         });
 
         test('actionHistory is not an array', () => {
           const testError = new Error('test error');
-          expect(() => submitter.report('error', 'test message', testError, {}, {})).toThrow(
-            'actionHistory must be an array',
-          );
+          expect(() =>
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- the wrong data type is the test condition
+            // @ts-ignore the wrong data type is the test condition
+            submitter.report('error', 'test message', testError, {}, { type: 'TEST' }),
+          ).toThrow('actionHistory must be an array');
         });
       });
     });
@@ -176,7 +188,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
     });
 
     describe('Report to the local console: logToConsole()', () => {
-      const remainingArguments = ['test message', new Error('test error')];
+      const remainingArguments: [string, Error] = ['test message', new Error('test error')];
 
       describe('Nothing is logged to the console if configuration option "isVerbose" is set to "false"', () => {
         for (const logLevel of acceptedLogLevels) {
@@ -787,16 +799,14 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           payload.data.custom = {
             configuration: {
               apiUrl: defaultApiUrl,
-              browsersSupportedRegex: browsersSupportedRegex.toString(),
+              browsersSupportedRegex,
               browserUnsupportedTitlePrefix: '[UNSUPPORTED BROWSER] ',
               environment: 'test',
               hasConfigurationInPayload: true,
               isBrowserSupported: true,
               isVerbose: true,
-              onUnhandledError: onUnhandledError.toString(),
-              onUnhandledPromiseRejection: onUnhandledPromiseRejection.toString(),
-              setContext: setContext.toString(),
-              shouldIgnoreOccurrence: shouldIgnoreOccurrence.toString(),
+              setContext,
+              shouldIgnoreOccurrence,
             },
             isBrowserSupported,
             languagePreferred,
@@ -992,6 +1002,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
 
       test('sendBeacon() is unavailable, fallback to fetch()', () => {
         const sendBeaconBackup = navigator.sendBeacon;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- deleting a non-optional operand is necessary for this test condition
         // @ts-ignore deleting a non-optional operand is necessary for this test condition
         delete navigator.sendBeacon;
 

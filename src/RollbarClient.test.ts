@@ -1,6 +1,7 @@
 // Internal Imports
 import { RollbarClient } from './RollbarClient.js';
 import type { IConfigurationOptions } from './interfaces';
+import type { TSubmitterParameters } from './types.js';
 
 // Module Mocks
 const mockReport = jest.fn();
@@ -224,9 +225,15 @@ describe(`Class: ${RollbarClient.name}`, () => {
       const testError = new Error('unexpected thing happened');
       const applicationState = { one: 'two', other: 'thing' };
       const actionHistory = [{ type: 'ACTION_TYPE_ONE' }, { payload: 77, type: 'ACTION_TYPE_TWO' }];
-      const testArguments = ['error', 'test message', testError, applicationState, actionHistory];
+      const testArguments: TSubmitterParameters = [
+        'error',
+        'test message',
+        testError,
+        applicationState,
+        actionHistory,
+      ];
       client.initializeEventListeners();
-      client.log(...testArguments);
+      await client.log(...testArguments);
 
       const { RollbarClientSubmitter } = await import('./RollbarClientSubmitter.js');
       const submitter = new RollbarClientSubmitter(configuration);

@@ -20,11 +20,11 @@
     "delete:node_modules": "rm -rf node_modules",
     "delete:package-lock": "rm -f package-lock.json",
     "format:code": "prettier --write --cache --no-editorconfig .",
-    "format:code:javascript": "prettier --write --cache --no-editorconfig \"**/*.{cjs,js,mjs}\"",
     "format:code:json": "prettier --write --cache --no-editorconfig \"**/*.json\"",
     "format:code:markdown": "prettier --write --cache --no-editorconfig \"**/*.md\"",
+    "format:code:typescript": "prettier --write --cache --no-editorconfig \"**/*.{cts,ts,mts}\"",
     "format:code:yaml": "prettier --write --cache --no-editorconfig \"**/*.yml\"",
-    "lint:javascript": "echo Linting JavaScript... && eslint --ext cjs,js,mjs --max-warnings 0 --cache --cache-location .eslintcache --cache-strategy content .",
+    "lint:typescript": "echo Linting JavaScript... && eslint --ext cts,ts,mts --max-warnings 0 --cache --cache-location .eslintcache --cache-strategy content .",
     "list:eslint:disable-directives": "node_modules/@vscode/ripgrep/bin/rg '/(/|\\*+)[ \\t]*eslint-disable[^*]*(\\*+/)?'",
     "list:todo-comments": "node_modules/@vscode/ripgrep/bin/rg --only-matching '(TODO|FIXME):[a-zA-Z0-9\\t .,;?!@#$%^&*()]+'",
     "reinstall": "npm run --silent delete:node_modules && npm run --silent delete:package-lock && npm i",
@@ -37,11 +37,11 @@
     "validate:environment:symlinks": "./scripts/npm/validateEnvironmentSymlinks.mjs",
     "validate:environment:versions": "./scripts/npm/validateEnvironmentVersions.mjs",
     "validate:formatting": "prettier --check --cache --no-editorconfig .",
-    "validate:formatting:javascript": "prettier --check --cache --no-editorconfig \"**/*.{cjs,js,mjs}\"",
     "validate:formatting:json": "prettier --check --cache --no-editorconfig \"**/*.json\"",
     "validate:formatting:markdown": "prettier --check --cache --no-editorconfig \"**/*.md\"",
+    "validate:formatting:typescript": "prettier --check --cache --no-editorconfig \"**/*.{cts,ts,mts}\"",
     "validate:formatting:yaml": "prettier --check --cache --no-editorconfig \"**/*.yml\"",
-    "validate:linting:eslint": "eslint-config-prettier js/rollupPluginBuildSizes.mjs"
+    "validate:linting:eslint": "eslint-config-prettier src/RollbarClient.ts"
   },
   "bundleDependencies": [
     "error-stack-parser",
@@ -54,11 +54,13 @@
     "@rollup/plugin-node-resolve": "15.0.1",
     "@rollup/plugin-replace": "5.0.1",
     "@types/jest": "29.2.3",
+    "@typescript-eslint/eslint-plugin": "5.45.1",
     "@vscode/ripgrep": "1.14.2",
     "babel-jest": "29.3.1",
     "error-stack-parser": "2.1.4",
     "eslint": "8.28.0",
     "eslint-config-airbnb-base": "15.0.0",
+    "eslint-config-airbnb-typescript": "17.0.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-eslint-comments": "3.2.0",
     "eslint-plugin-jest": "27.1.6",
@@ -73,6 +75,7 @@
     "prettier": "2.8.0",
     "rollup": "2.79.1",
     "rollup-plugin-delete": "2.0.0",
-    "rollup-plugin-terser": "7.0.2"
+    "rollup-plugin-terser": "7.0.2",
+    "typescript": "4.9.4"
   }
 }

@@ -29,7 +29,6 @@ const libraryVersion = process.env['npm_package_version'];
 function buildEnumerableObject(targetObject: Error) {
   const enumerableObject: IErrorIndexSignature = {};
   for (const key of Object.getOwnPropertyNames(targetObject)) {
-    // @ts-ignore TODO: consider how to handle the undefined case if the for/of loop runs 0 times
     enumerableObject[key] = targetObject[key];
   }
   return enumerableObject;
@@ -58,6 +57,7 @@ function getStackFrames(error: Error) {
 
 function logToConsole(...parameters: TSubmitterParameters) {
   const [level, ...remainingArguments] = parameters;
+  // eslint-disable-next-line default-case -- no default case applies in this situation
   switch (level) {
     case 'critical':
       console.error('[ROLLBAR CRITICAL]', ...remainingArguments);
@@ -112,7 +112,7 @@ function submitOccurrence(url: string, payload: IPayload) {
     headers: { 'Content-Type': 'application/json' },
     keepalive: true,
     method: 'POST',
-  });
+  }).catch(() => {});
 }
 
 function validateReportArguments(...parameters: TSubmitterParameters) {
@@ -202,7 +202,7 @@ class RollbarClientSubmitter {
             ...(commitHash && { code_version: commitHash }),
           },
         },
-        context: setContext(),
+        context: setContext ? setContext() : configurationDefaults.setContext(),
         custom: {
           isBrowserSupported,
           languagePreferred: navigator.language,
