@@ -1,11 +1,12 @@
 // Internal Imports
 import type { IConfigurationOptions } from './interfaces';
+import type { RollbarClientSubmitter } from './RollbarClientSubmitter';
 import type { TSubmitterParameters } from './types';
 
 // Class Definition
 class RollbarClient {
   configuration: IConfigurationOptions;
-  submitter?: object; // TODO: make this typing more specific
+  submitter?: RollbarClientSubmitter;
 
   constructor(configurationOptions: IConfigurationOptions) {
     this.configuration = configurationOptions;
@@ -32,13 +33,15 @@ class RollbarClient {
   }
 
   onErrorDefault = (errorEvent: ErrorEvent) => {
-    this.log('warning', 'Unhandled error occurred', errorEvent.error).catch(() => {});
+    this.log('warning', 'Unhandled error occurred', errorEvent.error as Error).catch(() => {});
   };
 
   onUnhandledRejectionDefault = (promiseRejectionEvent: PromiseRejectionEvent) => {
-    this.log('warning', 'Unhandled promise rejection occurred', promiseRejectionEvent.reason).catch(
-      () => {},
-    );
+    this.log(
+      'warning',
+      'Unhandled promise rejection occurred',
+      promiseRejectionEvent.reason as Error,
+    ).catch(() => {});
   };
 }
 

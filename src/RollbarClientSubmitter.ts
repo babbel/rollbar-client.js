@@ -6,11 +6,10 @@ import extend from 'just-extend';
 import type {
   IConfigurationInternal,
   IConfigurationOptions,
-  IErrorIndexSignature,
   IGenericObjectIndexSignature,
   IPayload,
 } from './interfaces';
-import type { TSubmitterParameters } from './types';
+import type { TConfigurationObjectValue, TSubmitterParameters } from './types';
 
 // Local Variables
 const configurationDefaults = {
@@ -27,9 +26,9 @@ const libraryVersion = process.env['npm_package_version'];
 
 // Local Functions
 function buildEnumerableObject(targetObject: Error) {
-  const enumerableObject: IErrorIndexSignature = {};
+  const enumerableObject: Record<string, string | Error> = {};
   for (const key of Object.getOwnPropertyNames(targetObject)) {
-    enumerableObject[key] = targetObject[key];
+    enumerableObject[key] = (targetObject as Required<Error>)[key as keyof Error];
   }
   return enumerableObject;
 }
@@ -82,14 +81,12 @@ function serializeConfigurationObject(configObject: IConfigurationInternal) {
       continue;
     }
 
-    const isFunction = value instanceof Function;
-    const isRegex = value instanceof RegExp;
-    if (isFunction || isRegex) {
-      serializedConfigObject[key] = value.toString();
+    if (value instanceof Function || value instanceof RegExp) {
+      serializedConfigObject[key] = (value as typeof Function | RegExp).toString();
       // eslint-disable-next-line no-continue -- explicitly cast functions and regexes to strings; the default case is to serialize the raw value
       continue;
     }
-    serializedConfigObject[key] = value;
+    serializedConfigObject[key] = value as TConfigurationObjectValue;
   }
   return serializedConfigObject;
 }
@@ -154,7 +151,7 @@ class RollbarClientSubmitter {
     this.errorHistory = [];
   }
 
-  buildPayload(...parameters: TSubmitterParameters) {
+  buildPayload(...parameters: TSubmitterParameters): IPayload {
     const [level, titleText, error, applicationState, actionHistory] = parameters;
     const { configuration } = this;
     const {
@@ -170,25 +167,28 @@ class RollbarClientSubmitter {
       setContext,
       userInfo,
     } = configuration;
-    const title = `${isBrowserSupported ? '' : browserUnsupportedTitlePrefix}${titleText}`;
+    const title = `${
+      isBrowserSupported ? '' : (browserUnsupportedTitlePrefix as string)
+    }${titleText}`;
 
     // Build the payload's body object depending on whether or not an error object is passed in
-    const body = error
-      ? {
-          trace: {
-            exception: {
-              class: error.constructor?.name ?? error.name ?? '(unknown)',
-              description: title,
-              message: error.message,
-              raw: String(error),
-              stack: error.stack,
+    const body =
+      error && error instanceof Error
+        ? {
+            trace: {
+              exception: {
+                class: error.constructor?.name ?? error.name ?? '(unknown)',
+                description: title,
+                message: error.message,
+                raw: String(error),
+                stack: error.stack,
+              },
+              frames: getStackFrames(error),
             },
-            frames: getStackFrames(error),
-          },
-        }
-      : {
-          message: { body: title },
-        };
+          }
+        : {
+            message: { body: title },
+          };
 
     const payloadPreMerge: IPayload = {
       access_token: accessToken,
@@ -204,7 +204,7 @@ class RollbarClientSubmitter {
         },
         context: setContext ? setContext() : configurationDefaults.setContext(),
         custom: {
-          isBrowserSupported,
+          isBrowserSupported: isBrowserSupported ?? true,
           languagePreferred: navigator.language,
           languages: navigator.languages.join(', '),
           reportingMethod: 'sendBeacon',
@@ -239,7 +239,7 @@ class RollbarClientSubmitter {
     }
 
     const payloadMerged = extend(true, payloadPreMerge, customPayloadFields);
-    return buildObjectDeepSorted(payloadMerged);
+    return buildObjectDeepSorted(payloadMerged) as IPayload;
   }
 
   report(...parameters: TSubmitterParameters) {

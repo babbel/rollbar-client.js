@@ -1,11 +1,11 @@
 // Internal Imports
-import { RollbarClient } from './RollbarClient.js';
+import { RollbarClient } from './RollbarClient';
 import type { IConfigurationOptions } from './interfaces';
-import type { TSubmitterParameters } from './types.js';
+import type { TSubmitterParameters } from './types';
 
 // Module Mocks
 const mockReport = jest.fn();
-jest.mock('./RollbarClientSubmitter.js', () => ({
+jest.mock('./RollbarClientSubmitter', () => ({
   RollbarClientSubmitter: jest.fn().mockImplementation(() => ({
     report: mockReport,
   })),

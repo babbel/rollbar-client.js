@@ -22,5 +22,5 @@
     "strict": true,
     "target": "es2021"
   },
-  "include": ["./src/**/*.ts"]
+  "files": ["./src/RollbarClient.test.ts", "./src/RollbarClientSubmitter.test.ts"]
 }

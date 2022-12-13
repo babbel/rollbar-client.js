@@ -3,7 +3,7 @@ import * as ErrorStackParser from 'error-stack-parser';
 
 // Internal Imports
 import { name as expectedlibraryName, version as expectedlibraryVersion } from '../package.json';
-import { RollbarClientSubmitter } from './RollbarClientSubmitter.js';
+import { RollbarClientSubmitter } from './RollbarClientSubmitter';
 import type { IConfigurationOptions, IGenericObjectIndexSignature, IPayload } from './interfaces';
 
 // Local Variables
@@ -110,9 +110,9 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
       }
       jest.spyOn(window, 'fetch').mockImplementation(fetchMock).mockName('fetchMock');
 
-      if (typeof navigator.sendBeacon !== 'function') {
-        navigator.sendBeacon = sendBeaconMock;
-      }
+      // if (typeof navigator.sendBeacon !== 'function') {
+      //   navigator.sendBeacon = sendBeaconMock;
+      // }
       jest
         .spyOn(navigator, 'sendBeacon')
         .mockImplementation(sendBeaconMock)
@@ -131,7 +131,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
     describe('Validate input arguments: validateReportArgs()', () => {
       describe('All correct log levels are accepted', () => {
         for (const logLevel of acceptedLogLevels) {
-          // eslint-disable-next-line no-loop-func, @typescript-eslint/no-loop-func -- "submitter" is block scoped, so this appears to be a false alarm
+          // eslint-disable-next-line @typescript-eslint/no-loop-func -- "submitter" is block scoped, so this appears to be a false alarm
           test(`${logLevel}`, () => {
             expect(() => submitter.report(logLevel, 'test message')).not.toThrow();
           });
@@ -424,7 +424,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           const testMessage = 'test message';
           submitter.report('error', testMessage);
 
-          const actualPayload = JSON.parse(navigator.sendBeacon.mock.calls[0][1]);
+          const actualPayload = JSON.parse(navigator.sendBeacon.mock.calls[0][1]) as IPayload;
           const actualLibraryVersion = actualPayload.data.notifier.version;
 
           expect(actualLibraryVersion).toBe(expectedlibraryVersion);
@@ -570,7 +570,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
-          // eslint-disable-next-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
+          // eslint-disable-next-line @typescript-eslint/naming-convention -- the library uses these fields, so tests cannot avoid these naming conventions
           const { browser, guess_uncaught_frames, source_map_enabled } =
             payload.data.client.javascript;
           payload.data.body = {
@@ -581,8 +581,8 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           payload.data.client.javascript = {
             browser,
             code_version: commitHash,
-            guess_uncaught_frames, // eslint-disable-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
-            source_map_enabled, // eslint-disable-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
+            guess_uncaught_frames,
+            source_map_enabled,
           };
 
           expect(window.fetch).toHaveBeenCalledTimes(0);
@@ -622,16 +622,17 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             },
             client,
             context,
-            custom,
+            custom: {
+              ...custom,
+              some,
+            },
             environment,
-            fingerprint,
+            fingerprint: fingerprint as string,
             framework,
             language,
             level,
             notifier,
             platform,
-            // @ts-ignore this field is necessary for this test
-            some,
             title: testMessage,
           };
 
@@ -644,17 +645,18 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           // Need to JSON.parse() stringified objects to not violoate ESLint sorting rules
           const customPayloadFields = JSON.parse(
             '{"data":{"zAtTheEnd":"its over...","arr":[1,{"two":"three"},4]},"aShouldBeFirst":{"second":"2nd","third":3,"fourth":[4,3,2,1],"fifth":{"really":"deep","object":["sorting","works","ignoring","arrays"]}}}',
-          );
+          ) as IPayload;
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, customPayloadFields });
           submitter.report('error', testMessage);
 
-          // eslint-disable-next-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
+          // eslint-disable-next-line @typescript-eslint/naming-convention -- the library uses these fields, so tests cannot avoid these naming conventions
           const { access_token, data } = buildMinimalPayload();
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- deleting this field is part of the test, so this action is unavoidable
           // @ts-ignore deleting this field is part of the test, so this action is unavoidable
           delete data.body;
           const payload = {
-            access_token, // eslint-disable-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
+            access_token,
             aShouldBeFirst: {
               fifth: {
                 object: ['sorting', 'works', 'ignoring', 'arrays'],
@@ -666,6 +668,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             },
             data: {
               arr: [1, { two: 'three' }, 4],
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- creating badly-sorted data is part of this test, TS has to be ignored here
               // @ts-ignore creating badly-sorted data is part of this test, TS has to be ignored here
               body: {
                 message: {
@@ -953,7 +956,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             context,
             custom,
             environment,
-            fingerprint,
+            fingerprint: fingerprint as string, // Always set in buildMinimalPayload()
             framework,
             language,
             level,

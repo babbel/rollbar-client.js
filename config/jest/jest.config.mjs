@@ -1,3 +1,5 @@
+/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
@@ -12,14 +14,15 @@ export default {
   },
   errorOnDeprecated: true,
   maxWorkers: '100%',
-  moduleFileExtensions: ['js', 'json', 'mjs'],
+  // moduleFileExtensions: ['js', 'ts', 'json'],
+  preset: 'ts-jest',
   // resetMocks: true,
   // restoreMocks: true,
   testEnvironment: 'jsdom',
   testEnvironmentOptions: {
     url: 'http://localhost', // jsdom config option for location.href
   },
-  testMatch: ['**/*.test.{js,mjs}'],
+  testMatch: ['**/*.test.ts'],
   testPathIgnorePatterns: ['/node_modules/'],
   testTimeout: 5_000,
 };

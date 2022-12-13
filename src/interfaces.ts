@@ -5,7 +5,7 @@ interface IConfigurationOptions {
   browsersSupportedRegex?: RegExp;
   browserUnsupportedTitlePrefix?: string;
   commitHash?: string;
-  customPayloadFields?: any;
+  customPayloadFields?: object;
   environment: string;
   fingerprint?: string | false;
   hasConfigurationInPayload?: boolean;
@@ -25,7 +25,7 @@ interface IConfigurationInternal {
   browsersSupportedRegex: RegExp;
   browserUnsupportedTitlePrefix: string;
   commitHash?: string;
-  customPayloadFields?: any;
+  customPayloadFields?: object;
   environment: string;
   fingerprint?: string | false;
   hasConfigurationInPayload?: boolean;
@@ -37,9 +37,9 @@ interface IConfigurationInternal {
   userInfo?: object;
 }
 
-interface IErrorIndexSignature {
-  [key: string]: string | Error;
-}
+// interface IErrorIndexSignature {
+//   [key: string]: string | Error;
+// }
 
 interface IGenericObjectIndexSignature {
   [key: string]: any;
@@ -68,6 +68,7 @@ interface IPayload {
       applicationState?: string;
       configuration?: Omit<IConfigurationInternal, 'accessToken'>;
       locationInfo?: object;
+      [key: string]: any;
     };
     environment: string;
     framework: string | false;
@@ -87,7 +88,7 @@ interface IPayload {
 export {
   IConfigurationInternal,
   IConfigurationOptions,
-  IErrorIndexSignature,
+  // IErrorIndexSignature,
   IGenericObjectIndexSignature,
   IPayload,
 };
