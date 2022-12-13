@@ -33,16 +33,26 @@ function buildEnumerableObject(targetObject: Error) {
   return enumerableObject;
 }
 
-function buildObjectDeepSorted(targetValue: any) {
-  if (targetValue === null || typeof targetValue !== 'object' || Array.isArray(targetValue)) {
-    return targetValue;
-  }
+// function buildObjectDeepSorted(targetValue: any) {
+//   if (targetValue === null || typeof targetValue !== 'object' || Array.isArray(targetValue)) {
+//     return targetValue;
+//   }
 
-  const newObject: IGenericObjectIndexSignature = {};
-  for (const key of Object.keys(targetValue).sort((a, b) => a.localeCompare(b, 'en'))) {
-    newObject[key] = buildObjectDeepSorted(targetValue[key]);
+//   const newObject: IGenericObjectIndexSignature = {};
+//   for (const key of Object.keys(targetValue).sort((a, b) => a.localeCompare(b, 'en'))) {
+//     newObject[key] = buildObjectDeepSorted(targetValue[key]);
+//   }
+//   return newObject;
+// }
+function buildObjectDeepSorted<T>(targetValue: T) {
+  if (typeof targetValue === 'object' && targetValue !== null && !Array.isArray(targetValue)) {
+    const newObject: IGenericObjectIndexSignature = {};
+    for (const key of Object.keys(targetValue).sort((a, b) => a.localeCompare(b, 'en'))) {
+      newObject[key] = buildObjectDeepSorted(targetValue[key]);
+    }
+    return newObject;
   }
-  return newObject;
+  return targetValue;
 }
 
 function getStackFrames(error: Error) {
