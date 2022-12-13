@@ -18,6 +18,6 @@ jobs:
       # Task execution
       - run: npm run validate:environment
       - run: npm run validate:linting:eslint
-      - run: npm run lint:javascript
+      - run: npm run lint:typescript
       - run: npm run test:only
       - run: npm run build:only
