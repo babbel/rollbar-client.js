@@ -5,8 +5,10 @@
     "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,
     "importsNotUsedAsValues": "error",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "isolatedModules": true,
+    "module": "es2022",
+    "moduleResolution": "node16",
+    "noEmit": true,
     "noErrorTruncation": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
@@ -15,12 +17,13 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "outDir": "./dist",
+    // "outDir": "./dist",
     "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2021"
+    "target": "es2021",
+    "types": ["vite/client"]
   },
   "include": ["./src/**/*.ts"]
 }
