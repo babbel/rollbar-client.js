@@ -10,4 +10,4 @@ type TSubmitterParameters = [
 ];
 
 // Module Exports
-export { TConfigurationObjectValue, TSubmitterParameters };
+export type { TConfigurationObjectValue, TSubmitterParameters };

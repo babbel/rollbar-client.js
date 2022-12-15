@@ -85,7 +85,7 @@ interface IPayload {
 }
 
 // Module Exports
-export {
+export type {
   IConfigurationInternal,
   IConfigurationOptions,
   // IErrorIndexSignature,
