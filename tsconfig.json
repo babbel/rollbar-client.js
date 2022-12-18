@@ -22,8 +22,8 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2021",
-    "types": ["vite/client"]
+    "target": "es2021"
+    // "types": ["vite/client"]
   },
   "include": ["./src/**/*.ts", "./config/vite/vite.config.ts"]
 }
