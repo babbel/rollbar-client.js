@@ -25,5 +25,5 @@
     "target": "es2021",
     "types": ["vite/client"]
   },
-  "include": ["./src/**/*.ts"]
+  "include": ["./src/**/*.ts", "./config/vite/vite.config.ts"]
 }

@@ -16,11 +16,11 @@
   },
   "scripts": {
     "build": "npm-run-all --silent validate:environment list:todo-comments build:only",
-    "build:only": "vite build --config config/vite/vite.config.mjs",
+    "build:only": "vite build --config config/vite/vite.config.ts",
     "build:rollup": "rollup -c config/rollup/rollup.config.mjs",
     "delete:node_modules": "rm -rf node_modules",
     "delete:package-lock": "rm -f package-lock.json",
-    "dev": "vite dev --config config/vite/vite.config.mjs",
+    "dev": "vite dev --config config/vite/vite.config.ts",
     "format:code": "prettier --write --cache --no-editorconfig .",
     "format:code:json": "prettier --write --cache --no-editorconfig \"**/*.json\"",
     "format:code:markdown": "prettier --write --cache --no-editorconfig \"**/*.md\"",
