@@ -1,3 +1,5 @@
+/// <reference types="vitest" />
+
 import { defineConfig } from 'vite'; // eslint-disable-line import/no-extraneous-dependencies -- this is a dev-only dependency
 import { fileURLToPath } from 'node:url';
 
@@ -15,5 +17,13 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     target: 'modules',
+  },
+  test: {
+    clearMocks: true,
+    coverage: {
+      provider: 'c8',
+      reportsDirectory: './vitestCodeCoverage',
+    },
+    environment: 'happy-dom',
   },
 });

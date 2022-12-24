@@ -123,19 +123,10 @@ function submitOccurrence(url: string, payload: IPayload) {
 }
 
 function validateReportArguments(...parameters: TSubmitterParameters) {
-  const [level, , error, , actionHistory] = parameters;
-
+  const [level] = parameters;
   const acceptedLogLevels = ['critical', 'debug', 'error', 'info', 'warning'];
   if (!acceptedLogLevels.includes(level)) {
     throw new Error(`Log level can only be one of the following: ${acceptedLogLevels.join(', ')}`);
-  }
-
-  if (error && !(error instanceof Error)) {
-    throw new TypeError('Error objects must be an instance of class "Error"');
-  }
-
-  if (actionHistory && !Array.isArray(actionHistory)) {
-    throw new TypeError('actionHistory must be an array');
   }
 }
 

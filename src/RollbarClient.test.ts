@@ -1,20 +1,27 @@
+// External Imports
+import { beforeAll, describe, expect, test, vi } from 'vitest';
+
 // Internal Imports
 import { RollbarClient } from './RollbarClient';
 import type { IConfigurationOptions } from './interfaces';
 import type { TSubmitterParameters } from './types';
 
 // Module Mocks
-const mockReport = jest.fn();
-jest.mock('./RollbarClientSubmitter', () => ({
-  RollbarClientSubmitter: jest.fn().mockImplementation(() => ({
-    report: mockReport,
-  })),
-}));
+// vi.mock('./RollbarClientSubmitter', () => ({
+//   RollbarClientSubmitter: vi.fn().mockImplementation(() => ({
+//     report: vi.fn(),
+//   })),
+// }));
+vi.mock('./RollbarClientSubmitter', () => {
+  const RollbarClientSubmitter = vi.fn();
+  RollbarClientSubmitter.prototype.report = vi.fn();
+  return { RollbarClientSubmitter };
+});
 
 // Execute Tests
 describe(`Class: ${RollbarClient.name}`, () => {
   beforeAll(() => {
-    jest.spyOn(window, 'addEventListener');
+    vi.spyOn(window, 'addEventListener');
   });
 
   describe('Class instantiation and event listener attachment', () => {
@@ -76,7 +83,7 @@ describe(`Class: ${RollbarClient.name}`, () => {
     });
 
     test('"error" listener override, "unhandledrejection" listener default', () => {
-      const onUnhandledError = jest.fn();
+      const onUnhandledError = vi.fn();
       const configuration = { accessToken: 'abc123', environment: 'test', onUnhandledError };
       const client = new RollbarClient(configuration);
       client.initializeEventListeners();
@@ -91,7 +98,7 @@ describe(`Class: ${RollbarClient.name}`, () => {
     });
 
     test('"error" listener default, "unhandledrejection" listener override', () => {
-      const onUnhandledPromiseRejection = jest.fn();
+      const onUnhandledPromiseRejection = vi.fn();
       const configuration = {
         accessToken: 'abc123',
         environment: 'test',
@@ -110,8 +117,8 @@ describe(`Class: ${RollbarClient.name}`, () => {
     });
 
     test('both listener types overridden', () => {
-      const onUnhandledError = jest.fn();
-      const onUnhandledPromiseRejection = jest.fn();
+      const onUnhandledError = vi.fn();
+      const onUnhandledPromiseRejection = vi.fn();
       const configuration = {
         accessToken: 'abc123',
         environment: 'test',
@@ -137,8 +144,8 @@ describe(`Class: ${RollbarClient.name}`, () => {
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
-      jest.spyOn(client, 'onErrorDefault').mockImplementation();
-      jest.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation();
+      vi.spyOn(client, 'onErrorDefault').mockImplementation(() => {});
+      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(() => {});
       client.initializeEventListeners();
       window.dispatchEvent(errorEvent);
       window.dispatchEvent(unhandledRejectionEvent);
@@ -150,13 +157,13 @@ describe(`Class: ${RollbarClient.name}`, () => {
     });
 
     test('"error" listener override, "unhandledrejection" listener default', () => {
-      const onUnhandledError = jest.fn();
+      const onUnhandledError = vi.fn();
       const configuration = { accessToken: 'abc123', environment: 'test', onUnhandledError };
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
-      jest.spyOn(client, 'onErrorDefault').mockImplementation();
-      jest.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation();
+      vi.spyOn(client, 'onErrorDefault').mockImplementation(() => {});
+      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(() => {});
       client.initializeEventListeners();
       window.dispatchEvent(errorEvent);
       window.dispatchEvent(unhandledRejectionEvent);
@@ -169,7 +176,7 @@ describe(`Class: ${RollbarClient.name}`, () => {
     });
 
     test('"error" listener default, "unhandledrejection" listener override', () => {
-      const onUnhandledPromiseRejection = jest.fn();
+      const onUnhandledPromiseRejection = vi.fn();
       const configuration = {
         accessToken: 'abc123',
         environment: 'test',
@@ -178,22 +185,22 @@ describe(`Class: ${RollbarClient.name}`, () => {
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
-      jest.spyOn(client, 'onErrorDefault').mockImplementation();
-      jest.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation();
+      vi.spyOn(client, 'onErrorDefault').mockImplementation(() => {});
+      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(() => {});
       client.initializeEventListeners();
       window.dispatchEvent(errorEvent);
       window.dispatchEvent(unhandledRejectionEvent);
 
       expect(client.onErrorDefault).toHaveBeenCalledTimes(1);
-      expect(client.onErrorDefault).toHaveBeenCalledWith(unhandledRejectionEvent);
+      expect(client.onErrorDefault).toHaveBeenCalledWith(errorEvent);
       expect(client.onUnhandledRejectionDefault).toHaveBeenCalledTimes(0);
       expect(onUnhandledPromiseRejection).toHaveBeenCalledTimes(1);
-      expect(onUnhandledPromiseRejection).toHaveBeenCalledWith(errorEvent);
+      expect(onUnhandledPromiseRejection).toHaveBeenCalledWith(unhandledRejectionEvent);
     });
 
     test('both listener types overridden', () => {
-      const onUnhandledError = jest.fn();
-      const onUnhandledPromiseRejection = jest.fn();
+      const onUnhandledError = vi.fn();
+      const onUnhandledPromiseRejection = vi.fn();
       const configuration = {
         accessToken: 'abc123',
         environment: 'test',
@@ -203,18 +210,18 @@ describe(`Class: ${RollbarClient.name}`, () => {
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
-      jest.spyOn(client, 'onErrorDefault').mockImplementation();
-      jest.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation();
+      vi.spyOn(client, 'onErrorDefault').mockImplementation(() => {});
+      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(() => {});
       client.initializeEventListeners();
       window.dispatchEvent(errorEvent);
       window.dispatchEvent(unhandledRejectionEvent);
 
       expect(client.onErrorDefault).toHaveBeenCalledTimes(0);
       expect(onUnhandledError).toHaveBeenCalledTimes(1);
-      expect(onUnhandledError).toHaveBeenCalledWith(unhandledRejectionEvent);
+      expect(onUnhandledError).toHaveBeenCalledWith(errorEvent);
       expect(client.onUnhandledRejectionDefault).toHaveBeenCalledTimes(0);
       expect(onUnhandledPromiseRejection).toHaveBeenCalledTimes(1);
-      expect(onUnhandledPromiseRejection).toHaveBeenCalledWith(errorEvent);
+      expect(onUnhandledPromiseRejection).toHaveBeenCalledWith(unhandledRejectionEvent);
     });
   });
 

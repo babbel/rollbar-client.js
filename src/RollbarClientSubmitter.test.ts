@@ -1,4 +1,5 @@
 // External Imports
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import * as ErrorStackParser from 'error-stack-parser';
 
 // Internal Imports
@@ -50,11 +51,9 @@ function buildMinimalPayload(): IPayload {
   };
 }
 
-const fetchMock = jest.fn(() =>
-  Promise.resolve({
-    json: () => Promise.resolve('test'),
-  }),
-) as jest.Mock;
+function fetchMock(): Promise<Response> {
+  return Promise.resolve(new Response());
+}
 
 function getStackFrames(error: Error) {
   return ErrorStackParser.parse(error).map((frame) => ({
@@ -70,18 +69,53 @@ function omitFromObject(key: string, object: IGenericObjectIndexSignature) {
   return remaining;
 }
 
-const sendBeaconMock = jest.fn(() => true) as jest.Mock;
+function sendBeaconMock(): Promise<boolean> {
+  return Promise.resolve(true);
+}
 
 // Execute Tests
 describe(`Class: ${RollbarClientSubmitter.name}`, () => {
+  let submitter = new RollbarClientSubmitter(minimalCorrectConfig);
+
+  beforeAll(() => {
+    vi.spyOn(console, 'debug')
+      .mockImplementation(() => {})
+      .mockName('consoleDebugMock');
+    vi.spyOn(console, 'error')
+      .mockImplementation(() => {})
+      .mockName('consoleErrorMock');
+    vi.spyOn(console, 'info')
+      .mockImplementation(() => {})
+      .mockName('consoleInfoMock');
+    vi.spyOn(console, 'warn')
+      .mockImplementation(() => {})
+      .mockName('consoleWarnMock');
+
+    if (typeof navigator.sendBeacon !== 'function') {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- TODO: remove manually setting sendBeacon() once happy-dom supports it natively
+      // @ts-ignore
+      navigator.sendBeacon = sendBeaconMock;
+    }
+    vi.spyOn(navigator, 'sendBeacon').mockImplementation(sendBeaconMock).mockName('sendBeaconMock');
+
+    // Override the user agent so the browsersSupportedRegex feature can be reliably tested
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('happy-dom');
+
+    vi.spyOn(window, 'fetch').mockImplementation(fetchMock).mockName('fetchMock');
+  });
+
+  beforeEach(() => {
+    submitter = new RollbarClientSubmitter(minimalCorrectConfig);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('Class instantiation and configuration', () => {
     const requiredKeys = ['accessToken', 'environment'];
     for (const key of requiredKeys) {
       test(`throws when required configuration key "${key}" is missing`, () => {
-        // TODO: remove this old code when this is verified working
-        // const badConfig = { ...minimalCorrectConfig };
-        // delete badConfig[key];
-
         const badConfig = omitFromObject(key, minimalCorrectConfig);
         expect(() => new RollbarClientSubmitter(badConfig as IConfigurationOptions)).toThrow(
           `Configuration key "${key}" is required`,
@@ -95,39 +129,6 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
   });
 
   describe('Error occurrence submission', () => {
-    // Setup lifecycle behavior
-    let submitter = new RollbarClientSubmitter(minimalCorrectConfig);
-
-    beforeAll(() => {
-      jest.spyOn(console, 'debug').mockImplementation().mockName('consoleDebugMock');
-      jest.spyOn(console, 'error').mockImplementation().mockName('consoleErrorMock');
-      jest.spyOn(console, 'info').mockImplementation().mockName('consoleInfoMock');
-      jest.spyOn(console, 'warn').mockImplementation().mockName('consoleWarnMock');
-
-      // Stub and mock features unsupported by Jest
-      if (typeof window.fetch !== 'function') {
-        window.fetch = fetchMock;
-      }
-      jest.spyOn(window, 'fetch').mockImplementation(fetchMock).mockName('fetchMock');
-
-      // if (typeof navigator.sendBeacon !== 'function') {
-      //   navigator.sendBeacon = sendBeaconMock;
-      // }
-      jest
-        .spyOn(navigator, 'sendBeacon')
-        .mockImplementation(sendBeaconMock)
-        .mockName('sendBeaconMock');
-    });
-
-    beforeEach(() => {
-      submitter = new RollbarClientSubmitter(minimalCorrectConfig);
-    });
-
-    afterAll(() => {
-      jest.restoreAllMocks();
-    });
-
-    // Begin Tests
     describe('Validate input arguments: validateReportArgs()', () => {
       describe('All correct log levels are accepted', () => {
         for (const logLevel of acceptedLogLevels) {
@@ -143,21 +144,6 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(() => submitter.report('magic', 'test message')).toThrow(
             'Log level can only be one of the following: critical, debug, error, info, warning',
           );
-        });
-
-        test('error object is not an instance of class "Error"', () => {
-          expect(() =>
-            submitter.report('error', 'test message', new Error('bad thing happened')),
-          ).toThrow('Error objects must be an instance of class "Error"');
-        });
-
-        test('actionHistory is not an array', () => {
-          const testError = new Error('test error');
-          expect(() =>
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- the wrong data type is the test condition
-            // @ts-ignore the wrong data type is the test condition
-            submitter.report('error', 'test message', testError, {}, { type: 'TEST' }),
-          ).toThrow('actionHistory must be an array');
         });
       });
     });
@@ -470,7 +456,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
         });
 
         test('browsersSupportedRegex: user agent match', () => {
-          const browsersSupportedRegex = /jsdom/;
+          const browsersSupportedRegex = /happy-dom/;
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({
             ...minimalCorrectConfig,
@@ -595,7 +581,9 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             new: { stuff: 'is here' },
           };
           const customPayloadFields = {
-            data: { some },
+            data: {
+              custom: { some },
+            },
           };
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, customPayloadFields });
@@ -778,7 +766,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             return false;
           }
           const testMessage = 'test message';
-          const browsersSupportedRegex = /jsdom/;
+          const browsersSupportedRegex = /happy-dom/;
           submitter = new RollbarClientSubmitter({
             ...minimalCorrectConfig,
             browsersSupportedRegex,
@@ -802,14 +790,16 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           payload.data.custom = {
             configuration: {
               apiUrl: defaultApiUrl,
-              browsersSupportedRegex,
+              browsersSupportedRegex: browsersSupportedRegex.toString(),
               browserUnsupportedTitlePrefix: '[UNSUPPORTED BROWSER] ',
               environment: 'test',
               hasConfigurationInPayload: true,
               isBrowserSupported: true,
               isVerbose: true,
-              setContext,
-              shouldIgnoreOccurrence,
+              onUnhandledError: onUnhandledError.toString(),
+              onUnhandledPromiseRejection: onUnhandledPromiseRejection.toString(),
+              setContext: setContext.toString(),
+              shouldIgnoreOccurrence: shouldIgnoreOccurrence.toString(),
             },
             isBrowserSupported,
             languagePreferred,

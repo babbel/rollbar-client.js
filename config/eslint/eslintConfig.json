@@ -16,13 +16,6 @@
 
   "overrides": [
     {
-      "files": ["src/**/*.test.ts"],
-      "extends": [
-        "./config/eslint/eslintJestConfig.json",
-        "./config/eslint/eslintTypescriptConfig.json"
-      ]
-    },
-    {
       "files": ["src/RollbarClient*.ts"],
       "env": {
         "browser": true
