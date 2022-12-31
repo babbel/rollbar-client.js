@@ -1,3 +1,10 @@
+// Local Types
+type CustomConfiguration = Omit<IConfigurationInternal, 'accessToken'>;
+type SerializedObject<T extends object> = {
+  // eslint-disable-next-line @typescript-eslint/ban-types -- any function can be expected here
+  [key in keyof T]: T[key] extends Function | RegExp ? string : T[key];
+};
+
 // Local Interfaces
 interface IConfigurationOptions {
   accessToken: string;
@@ -66,9 +73,9 @@ interface IPayload {
       reportingMethod: 'fetch' | 'sendBeacon';
       actionHistory?: string;
       applicationState?: string;
-      configuration?: Omit<IConfigurationInternal, 'accessToken'>;
+      configuration?: SerializedObject<CustomConfiguration>;
       locationInfo?: object;
-      [key: string]: any;
+      [key: string]: unknown;
     };
     environment: string;
     framework: string | false;

@@ -3,13 +3,8 @@ import * as ErrorStackParser from 'error-stack-parser';
 import extend from 'just-extend';
 
 // Internal Imports
-import type {
-  IConfigurationInternal,
-  IConfigurationOptions,
-  IGenericObjectIndexSignature,
-  IPayload,
-} from './interfaces';
-import type { TConfigurationObjectValue, TSubmitterParameters } from './types';
+import type { IConfigurationInternal, IConfigurationOptions, IPayload } from './interfaces';
+import type { TSubmitterParameters } from './types';
 
 // Local Variables
 const configurationDefaults = {
@@ -44,15 +39,25 @@ function buildEnumerableObject(targetObject: Error) {
 //   }
 //   return newObject;
 // }
-function buildObjectDeepSorted<T>(targetValue: T) {
-  if (typeof targetValue === 'object' && targetValue !== null && !Array.isArray(targetValue)) {
-    const newObject: IGenericObjectIndexSignature = {};
-    for (const key of Object.keys(targetValue).sort((a, b) => a.localeCompare(b, 'en'))) {
-      newObject[key] = buildObjectDeepSorted(targetValue[key]);
-    }
-    return newObject;
+// function buildObjectDeepSorted<T>(targetValue: T) {
+//   if (typeof targetValue === 'object' && targetValue !== null && !Array.isArray(targetValue)) {
+//     const newObject: IGenericObjectIndexSignature = {};
+//     for (const key of Object.keys(targetValue).sort((a, b) => a.localeCompare(b, 'en'))) {
+//       newObject[key] = buildObjectDeepSorted(targetValue[key]);
+//     }
+//     return newObject;
+//   }
+//   return targetValue;
+// }
+function buildObjectDeepSorted<T extends object>(targetValue: T): T {
+  const newObject = {} as T;
+  for (const key of Object.keys(targetValue).sort((a, b) => a.localeCompare(b, 'en'))) {
+    const keyWithCast = key as keyof T;
+    const value = targetValue[keyWithCast];
+    const isObjectLiteral = typeof value === 'object' && value !== null && !Array.isArray(value);
+    newObject[keyWithCast] = isObjectLiteral ? (buildObjectDeepSorted(value) as T[keyof T]) : value;
   }
-  return targetValue;
+  return newObject;
 }
 
 function getStackFrames(error: Error) {
@@ -83,20 +88,40 @@ function logToConsole(...parameters: TSubmitterParameters) {
   }
 }
 
+// function serializeConfigurationObject(configObject: IConfigurationInternal) {
+//   const serializedConfigObject: IGenericObjectIndexSignature = {};
+//   for (const [key, value] of Object.entries(configObject)) {
+//     if (key === 'accessToken') {
+//       // eslint-disable-next-line no-continue -- skip serializing accessToken
+//       continue;
+//     }
+
+//     if (value instanceof Function || value instanceof RegExp) {
+//       serializedConfigObject[key] = (value as typeof Function | RegExp).toString();
+//       // eslint-disable-next-line no-continue -- explicitly cast functions and regexes to strings; the default case is to serialize the raw value
+//       continue;
+//     }
+//     serializedConfigObject[key] = value as TConfigurationObjectValue;
+//   }
+//   return serializedConfigObject;
+// }
 function serializeConfigurationObject(configObject: IConfigurationInternal) {
-  const serializedConfigObject: IGenericObjectIndexSignature = {};
+  const serializedConfigObject = {} as Required<IPayload['data']['custom']>['configuration'];
   for (const [key, value] of Object.entries(configObject)) {
     if (key === 'accessToken') {
       // eslint-disable-next-line no-continue -- skip serializing accessToken
       continue;
     }
-
-    if (value instanceof Function || value instanceof RegExp) {
-      serializedConfigObject[key] = (value as typeof Function | RegExp).toString();
+    const keyWithCast = key as keyof typeof serializedConfigObject;
+    const valueWithCast = value as Omit<IConfigurationInternal, 'payload'>[typeof keyWithCast];
+    if (valueWithCast instanceof Function || valueWithCast instanceof RegExp) {
+      (serializedConfigObject[keyWithCast] as string) = valueWithCast.toString();
       // eslint-disable-next-line no-continue -- explicitly cast functions and regexes to strings; the default case is to serialize the raw value
       continue;
     }
-    serializedConfigObject[key] = value as TConfigurationObjectValue;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- we need serialzdConfigObject as a generic value, otherwise as a union type it'll be considered never
+    (serializedConfigObject[keyWithCast] as typeof serializedConfigObject[typeof keyWithCast]) =
+      valueWithCast;
   }
   return serializedConfigObject;
 }
@@ -239,8 +264,8 @@ class RollbarClientSubmitter {
       payloadPreMerge.data.fingerprint = title;
     }
 
-    const payloadMerged = extend(true, payloadPreMerge, customPayloadFields);
-    return buildObjectDeepSorted(payloadMerged) as IPayload;
+    const payloadMerged = extend(true, payloadPreMerge, customPayloadFields) as IPayload;
+    return buildObjectDeepSorted(payloadMerged);
   }
 
   report(...parameters: TSubmitterParameters) {
