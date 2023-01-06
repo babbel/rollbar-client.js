@@ -17,7 +17,7 @@
   "scripts": {
     "build": "npm-run-all --silent validate:environment list:todo-comments build:only",
     "build:only": "vite build --config config/vite/vite.config.mts",
-    "build:rollup": "rollup -c config/rollup/rollup.config.mjs",
+    "build:types": "tsc",
     "delete:node_modules": "rm -rf node_modules",
     "delete:package-lock": "rm -f package-lock.json",
     "dev": "vite dev --config config/vite/vite.config.mts",
