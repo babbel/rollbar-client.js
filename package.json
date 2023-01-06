@@ -28,7 +28,6 @@
     "reinstall": "npm run --silent delete:node_modules && npm run --silent delete:package-lock && npm i",
     "reinstall:use-lock-file": "npm run --silent delete:node_modules && npm ci",
     "test": "npm-run-all --silent validate:environment test:unit",
-    "test:jest": "jest --config config/jest/jest.config.mjs --coverage --rootDir .",
     "test:unit": "vitest --config config/vite/vite.config.mts --coverage",
     "test:unit:ui": "npm run --silent test:unit -- --ui",
     "update:package-versions": "./scripts/npm/updatePackageVersions.mjs && npm run --silent reinstall",
