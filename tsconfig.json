@@ -26,5 +26,9 @@
     "strict": true,
     "target": "es2021"
   },
-  "include": ["./src/RollbarClient.mts", "./src/RollbarClientSubmitter.mts"]
+  "include": [
+    "./config/vite/vite.config.mts",
+    "./src/RollbarClient.mts",
+    "./src/RollbarClientSubmitter.mts"
+  ]
 }
