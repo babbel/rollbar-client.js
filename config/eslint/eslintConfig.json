@@ -29,6 +29,9 @@
     },
     {
       "files": ["./src/**/*.test.mts"],
+      "parserOptions": {
+        "project": ["./tsconfig.test.json"]
+      },
       "rules": {
         "import/no-extraneous-dependencies": "off",
         "import/no-unresolved": "off",

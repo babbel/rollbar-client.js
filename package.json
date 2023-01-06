@@ -15,8 +15,8 @@
     "require": "./dist/RollbarClient.min.cjs"
   },
   "scripts": {
-    "build": "npm-run-all --silent validate:environment list:todo-comments build:only",
-    "build:only": "vite build --config config/vite/vite.config.mts",
+    "build": "npm-run-all --silent validate:environment list:todo-comments build:vite build:types",
+    "build:vite": "vite build --config config/vite/vite.config.mts",
     "build:types": "tsc",
     "delete:node_modules": "rm -rf node_modules",
     "delete:package-lock": "rm -f package-lock.json",
