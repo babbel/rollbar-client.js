@@ -105,7 +105,7 @@ function logToConsole(...parameters: TSubmitterParameters) {
 //   }
 //   return serializedConfigObject;
 // }
-function serializeConfigurationObject(configObject: IConfigurationInternal) {
+function serializeConfigurationObject(configObject: IConfigurationOptions) {
   const serializedConfigObject = {} as Required<IPayload['data']['custom']>['configuration'];
   for (const [key, value] of Object.entries(configObject)) {
     if (key === 'accessToken') {
@@ -113,7 +113,7 @@ function serializeConfigurationObject(configObject: IConfigurationInternal) {
       continue;
     }
     const keyWithCast = key as keyof typeof serializedConfigObject;
-    const valueWithCast = value as Omit<IConfigurationInternal, 'payload'>[typeof keyWithCast];
+    const valueWithCast = value as IConfigurationOptions[typeof keyWithCast];
     if (valueWithCast instanceof Function || valueWithCast instanceof RegExp) {
       (serializedConfigObject[keyWithCast] as string) = valueWithCast.toString();
       // eslint-disable-next-line no-continue -- explicitly cast functions and regexes to strings; the default case is to serialize the raw value
