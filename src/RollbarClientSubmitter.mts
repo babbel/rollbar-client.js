@@ -28,27 +28,6 @@ function buildEnumerableObject(targetObject: Error) {
   return enumerableObject;
 }
 
-// function buildObjectDeepSorted(targetValue: any) {
-//   if (targetValue === null || typeof targetValue !== 'object' || Array.isArray(targetValue)) {
-//     return targetValue;
-//   }
-
-//   const newObject: IGenericObjectIndexSignature = {};
-//   for (const key of Object.keys(targetValue).sort((a, b) => a.localeCompare(b, 'en'))) {
-//     newObject[key] = buildObjectDeepSorted(targetValue[key]);
-//   }
-//   return newObject;
-// }
-// function buildObjectDeepSorted<T>(targetValue: T) {
-//   if (typeof targetValue === 'object' && targetValue !== null && !Array.isArray(targetValue)) {
-//     const newObject: IGenericObjectIndexSignature = {};
-//     for (const key of Object.keys(targetValue).sort((a, b) => a.localeCompare(b, 'en'))) {
-//       newObject[key] = buildObjectDeepSorted(targetValue[key]);
-//     }
-//     return newObject;
-//   }
-//   return targetValue;
-// }
 function buildObjectDeepSorted<T extends object>(targetValue: T): T {
   const newObject = {} as T;
   for (const key of Object.keys(targetValue).sort((a, b) => a.localeCompare(b, 'en'))) {
@@ -88,23 +67,6 @@ function logToConsole(...parameters: TSubmitterParameters) {
   }
 }
 
-// function serializeConfigurationObject(configObject: IConfigurationInternal) {
-//   const serializedConfigObject: IGenericObjectIndexSignature = {};
-//   for (const [key, value] of Object.entries(configObject)) {
-//     if (key === 'accessToken') {
-//       // eslint-disable-next-line no-continue -- skip serializing accessToken
-//       continue;
-//     }
-
-//     if (value instanceof Function || value instanceof RegExp) {
-//       serializedConfigObject[key] = (value as typeof Function | RegExp).toString();
-//       // eslint-disable-next-line no-continue -- explicitly cast functions and regexes to strings; the default case is to serialize the raw value
-//       continue;
-//     }
-//     serializedConfigObject[key] = value as TConfigurationObjectValue;
-//   }
-//   return serializedConfigObject;
-// }
 function serializeConfigurationObject(configObject: IConfigurationOptions) {
   const serializedConfigObject = {} as Required<IPayload['data']['custom']>['configuration'];
   for (const [key, value] of Object.entries(configObject)) {
