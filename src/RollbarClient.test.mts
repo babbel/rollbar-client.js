@@ -2,9 +2,9 @@
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 
 // Internal Imports
-import { RollbarClient } from './RollbarClient';
-import type { IConfigurationOptions } from './interfaces';
-import type { TSubmitterParameters } from './types';
+import { RollbarClient } from './RollbarClient.mjs';
+import type { IConfigurationOptions } from './interfaces.mjs';
+import type { TSubmitterParameters } from './types.mjs';
 
 // Module Mocks
 vi.mock('./RollbarClientSubmitter', () => {
@@ -238,7 +238,7 @@ describe(`Class: ${RollbarClient.name}`, () => {
       client.initializeEventListeners();
       await client.log(...testArguments);
 
-      const { RollbarClientSubmitter } = await import('./RollbarClientSubmitter.js');
+      const { RollbarClientSubmitter } = await import('./RollbarClientSubmitter.mjs');
       const submitter = new RollbarClientSubmitter(configuration);
       expect(submitter.report).toHaveBeenCalledTimes(1);
       expect(submitter.report).toHaveBeenCalledWith(...testArguments);

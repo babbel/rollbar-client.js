@@ -3,8 +3,8 @@ import * as ErrorStackParser from 'error-stack-parser';
 import extend from 'just-extend';
 
 // Internal Imports
-import type { IConfigurationInternal, IConfigurationOptions, IPayload } from './interfaces';
-import type { TSubmitterParameters } from './types';
+import type { IConfigurationInternal, IConfigurationOptions, IPayload } from './interfaces.mjs';
+import type { TSubmitterParameters } from './types.mjs';
 
 // Local Variables
 const configurationDefaults = {

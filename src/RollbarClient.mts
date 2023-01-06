@@ -1,7 +1,7 @@
 // Internal Imports
-import type { IConfigurationOptions } from './interfaces';
-import type { RollbarClientSubmitter } from './RollbarClientSubmitter';
-import type { TSubmitterParameters } from './types';
+import type { IConfigurationOptions } from './interfaces.mjs';
+import type { RollbarClientSubmitter } from './RollbarClientSubmitter.mjs';
+import type { TSubmitterParameters } from './types.mjs';
 
 // Class Definition
 class RollbarClient {
@@ -26,7 +26,8 @@ class RollbarClient {
 
   async log(...parameters: TSubmitterParameters) {
     if (!this.submitter) {
-      const { RollbarClientSubmitter } = await import('./RollbarClientSubmitter.js');
+      // eslint-disable-next-line import/no-unresolved -- false positive of an unimportable package
+      const { RollbarClientSubmitter } = await import('./RollbarClientSubmitter.mjs');
       this.submitter = new RollbarClientSubmitter(this.configuration);
     }
     this.submitter.report(...parameters);

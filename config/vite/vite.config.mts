@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
     lib: {
-      entry: fileURLToPath(new URL('/src/RollbarClient.ts', import.meta.url)),
+      entry: fileURLToPath(new URL('/src/RollbarClient.mts', import.meta.url)),
       fileName: 'RollbarClient',
       formats: ['es'],
     },
