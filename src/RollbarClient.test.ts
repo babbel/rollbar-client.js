@@ -7,13 +7,9 @@ import type { IConfigurationOptions } from './interfaces';
 import type { TSubmitterParameters } from './types';
 
 // Module Mocks
-// vi.mock('./RollbarClientSubmitter', () => ({
-//   RollbarClientSubmitter: vi.fn().mockImplementation(() => ({
-//     report: vi.fn(),
-//   })),
-// }));
 vi.mock('./RollbarClientSubmitter', () => {
   const RollbarClientSubmitter = vi.fn();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- TODO: determine how to type prototype as non-any
   RollbarClientSubmitter.prototype.report = vi.fn();
   return { RollbarClientSubmitter };
 });

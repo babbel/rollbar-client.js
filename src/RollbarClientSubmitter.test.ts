@@ -69,8 +69,8 @@ function omitFromObject(key: string, object: IGenericObjectIndexSignature) {
   return remaining;
 }
 
-function sendBeaconMock(): Promise<boolean> {
-  return Promise.resolve(true);
+function sendBeaconMock(): boolean {
+  return true;
 }
 
 // Execute Tests

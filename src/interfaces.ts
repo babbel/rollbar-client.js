@@ -1,5 +1,8 @@
 // Local Types
-type CustomConfiguration = Omit<IConfigurationInternal, 'accessToken'>;
+type CustomConfiguration = Omit<IConfigurationInternal, 'accessToken'> & {
+  onUnhandledError?: string;
+  onUnhandledPromiseRejection?: string;
+};
 type SerializedObject<T extends object> = {
   // eslint-disable-next-line @typescript-eslint/ban-types -- any function can be expected here
   [key in keyof T]: T[key] extends Function | RegExp ? string : T[key];
@@ -22,7 +25,7 @@ interface IConfigurationOptions {
   onUnhandledError?: false | ((errorEvent: ErrorEvent) => void);
   onUnhandledPromiseRejection?: false | ((promiseRejectionEvent: PromiseRejectionEvent) => void);
   setContext?: () => string;
-  shouldIgnoreOccurrence?: (payload: object, configuration: IConfigurationInternal) => boolean; // TODO: use more specific param types
+  shouldIgnoreOccurrence?: (payload: IPayload, configuration: IConfigurationInternal) => boolean;
   userInfo?: object;
 }
 
@@ -40,7 +43,7 @@ interface IConfigurationInternal {
   isVerbose: boolean;
   locationInfo?: object;
   setContext: () => string;
-  shouldIgnoreOccurrence: (payload: object, configuration: IConfigurationInternal) => boolean; // TODO: use more specific param types
+  shouldIgnoreOccurrence: (payload: IPayload, configuration: IConfigurationInternal) => boolean;
   userInfo?: object;
 }
 
