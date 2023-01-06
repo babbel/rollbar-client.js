@@ -22,7 +22,7 @@
     "delete:package-lock": "rm -f package-lock.json",
     "dev": "vite dev --config config/vite/vite.config.mts",
     "format:code": "prettier --write --cache --no-editorconfig .",
-    "lint:typescript": "echo Linting JavaScript... && eslint --ext cts,ts,mts --max-warnings 0 --cache --cache-location .eslintcache --cache-strategy content .",
+    "lint:typescript": "echo Linting TypeScript... && eslint --ext cts,ts,mts --max-warnings 0 --cache --cache-location .eslintcache --cache-strategy content .",
     "list:eslint:disable-directives": "node_modules/@vscode/ripgrep/bin/rg '/(/|\\*+)[ \\t]*eslint-disable[^*]*(\\*+/)?'",
     "list:todo-comments": "node_modules/@vscode/ripgrep/bin/rg --only-matching '(TODO|FIXME):[a-zA-Z0-9\\t .,;?!@#$%^&*()]+'",
     "reinstall": "npm run --silent delete:node_modules && npm run --silent delete:package-lock && npm i",
