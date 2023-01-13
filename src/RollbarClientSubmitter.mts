@@ -1,6 +1,14 @@
 // External Imports
-import ErrorStackParser from 'error-stack-parser';
+import * as ErrorStackParser from 'error-stack-parser';
 import extend from 'just-extend';
+
+// Internal Imports
+import type {
+  IConfigurationInternal,
+  IConfigurationOptions,
+  IPayload,
+  TSubmitterParameters,
+} from './types.mjs';
 
 // Local Variables
 const configurationDefaults = {
@@ -12,31 +20,30 @@ const configurationDefaults = {
   setContext: () => window.location.href,
 };
 const configurationOptionsRequired = ['accessToken', 'environment'];
-const libraryName = process.env.npm_package_name;
-const libraryVersion = process.env.npm_package_version;
+const libraryName = process.env['npm_package_name'];
+const libraryVersion = process.env['npm_package_version'];
 
 // Local Functions
-function buildEnumerableObject(targetObject) {
-  const enumerableObject = {};
+function buildEnumerableObject(targetObject: Error) {
+  const enumerableObject: Record<string, string | Error> = {};
   for (const key of Object.getOwnPropertyNames(targetObject)) {
-    enumerableObject[key] = targetObject[key];
+    enumerableObject[key] = (targetObject as Required<Error>)[key as keyof Error];
   }
   return enumerableObject;
 }
 
-function buildObjectDeepSorted(targetValue) {
-  if (targetValue === null || typeof targetValue !== 'object' || Array.isArray(targetValue)) {
-    return targetValue;
-  }
-
-  const newObject = {};
+function buildObjectDeepSorted<T extends object>(targetValue: T): T {
+  const newObject = {} as T;
   for (const key of Object.keys(targetValue).sort((a, b) => a.localeCompare(b, 'en'))) {
-    newObject[key] = buildObjectDeepSorted(targetValue[key]);
+    const keyWithCast = key as keyof T;
+    const value = targetValue[keyWithCast];
+    const isObjectLiteral = typeof value === 'object' && value !== null && !Array.isArray(value);
+    newObject[keyWithCast] = isObjectLiteral ? (buildObjectDeepSorted(value) as T[keyof T]) : value;
   }
   return newObject;
 }
 
-function getStackFrames(error) {
+function getStackFrames(error: Error) {
   return ErrorStackParser.parse(error).map((frame) => ({
     colno: frame.columnNumber,
     filename: frame.fileName,
@@ -45,38 +52,47 @@ function getStackFrames(error) {
   }));
 }
 
-function logToConsole(level, ...remainingArguments) {
-  if (level === 'critical') {
-    console.error('[ROLLBAR CRITICAL]', ...remainingArguments);
-  } else if (['debug', 'error', 'info'].includes(level)) {
-    // eslint-disable-next-line no-console -- the if() statement is limiting this to the expected allowlist of debug, error, info
-    console[level](`[ROLLBAR ${level.toUpperCase()}]`, ...remainingArguments);
-  } else if (level === 'warning') {
-    console.warn('[ROLLBAR WARNING]', ...remainingArguments);
+function logToConsole(...parameters: TSubmitterParameters) {
+  const [level, ...remainingArguments] = parameters;
+  // eslint-disable-next-line default-case -- no default case applies in this situation
+  switch (level) {
+    case 'critical':
+      console.error('[ROLLBAR CRITICAL]', ...remainingArguments);
+      break;
+    case 'warning':
+      console.warn('[ROLLBAR WARNING]', ...remainingArguments);
+      break;
+    case 'debug':
+    case 'error':
+    case 'info':
+      // eslint-disable-next-line no-console -- the case statements are limiting this to the expected allowlist of debug, error, info
+      console[level](`[ROLLBAR ${level.toUpperCase()}]`, ...remainingArguments);
+      break;
   }
 }
 
-function serializeConfigurationObject(configObject) {
-  const serializedConfigObject = {};
+function serializeConfigurationObject(configObject: IConfigurationOptions) {
+  const serializedConfigObject = {} as Required<IPayload['data']['custom']>['configuration'];
   for (const [key, value] of Object.entries(configObject)) {
     if (key === 'accessToken') {
       // eslint-disable-next-line no-continue -- skip serializing accessToken
       continue;
     }
-
-    const isFunction = value instanceof Function;
-    const isRegex = value instanceof RegExp;
-    if (isFunction || isRegex) {
-      serializedConfigObject[key] = value.toString();
+    const keyWithCast = key as keyof typeof serializedConfigObject;
+    const valueWithCast = value as IConfigurationOptions[typeof keyWithCast];
+    if (valueWithCast instanceof Function || valueWithCast instanceof RegExp) {
+      (serializedConfigObject[keyWithCast] as string) = valueWithCast.toString();
       // eslint-disable-next-line no-continue -- explicitly cast functions and regexes to strings; the default case is to serialize the raw value
       continue;
     }
-    serializedConfigObject[key] = value;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- we need serialzdConfigObject as a generic value, otherwise as a union type it'll be considered never
+    (serializedConfigObject[keyWithCast] as typeof serializedConfigObject[typeof keyWithCast]) =
+      valueWithCast;
   }
   return serializedConfigObject;
 }
 
-function submitOccurrence(url, payload) {
+function submitOccurrence(url: string, payload: IPayload) {
   if (typeof navigator.sendBeacon === 'function') {
     const isSubmitSuccessful = navigator.sendBeacon(url, JSON.stringify(payload));
     if (isSubmitSuccessful) {
@@ -94,29 +110,23 @@ function submitOccurrence(url, payload) {
     headers: { 'Content-Type': 'application/json' },
     keepalive: true,
     method: 'POST',
-  });
+  }).catch(() => {});
 }
 
-function validateReportArguments(...parameters) {
-  const [level, , error, , actionHistory] = parameters;
-
+function validateReportArguments(...parameters: TSubmitterParameters) {
+  const [level] = parameters;
   const acceptedLogLevels = ['critical', 'debug', 'error', 'info', 'warning'];
   if (!acceptedLogLevels.includes(level)) {
     throw new Error(`Log level can only be one of the following: ${acceptedLogLevels.join(', ')}`);
-  }
-
-  if (error && !(error instanceof Error)) {
-    throw new TypeError('Error objects must be an instance of class "Error"');
-  }
-
-  if (actionHistory && !Array.isArray(actionHistory)) {
-    throw new TypeError('actionHistory must be an array');
   }
 }
 
 // Class Definition
 class RollbarClientSubmitter {
-  constructor(configurationOptions) {
+  configuration: IConfigurationOptions;
+  errorHistory: Array<object>; // TODO: add more specific object shape
+
+  constructor(configurationOptions: IConfigurationOptions) {
     for (const requiredKey of configurationOptionsRequired) {
       const hasKey = requiredKey in configurationOptions;
       if (!hasKey) {
@@ -133,7 +143,7 @@ class RollbarClientSubmitter {
     this.errorHistory = [];
   }
 
-  buildPayload(...parameters) {
+  buildPayload(...parameters: TSubmitterParameters): IPayload {
     const [level, titleText, error, applicationState, actionHistory] = parameters;
     const { configuration } = this;
     const {
@@ -149,29 +159,30 @@ class RollbarClientSubmitter {
       setContext,
       userInfo,
     } = configuration;
-    const title = `${isBrowserSupported ? '' : browserUnsupportedTitlePrefix}${titleText}`;
+    const title = `${
+      isBrowserSupported ? '' : (browserUnsupportedTitlePrefix as string)
+    }${titleText}`;
 
     // Build the payload's body object depending on whether or not an error object is passed in
-    const body = error
-      ? {
-          trace: {
-            exception: {
-              // TODO: use optional chaining
-              class: (error.constructor && error.constructor.name) || error.name || '(unknown)',
-
-              description: title,
-              message: error.message,
-              raw: String(error),
-              stack: error.stack,
+    const body =
+      error && error instanceof Error
+        ? {
+            trace: {
+              exception: {
+                class: error.constructor?.name ?? error.name ?? '(unknown)',
+                description: title,
+                message: error.message,
+                raw: String(error),
+                stack: error.stack,
+              },
+              frames: getStackFrames(error),
             },
-            frames: getStackFrames(error),
-          },
-        }
-      : {
-          message: { body: title },
-        };
+          }
+        : {
+            message: { body: title },
+          };
 
-    const payloadPreMerge = {
+    const payloadPreMerge: IPayload = {
       access_token: accessToken,
       data: {
         body,
@@ -183,16 +194,18 @@ class RollbarClientSubmitter {
             ...(commitHash && { code_version: commitHash }),
           },
         },
-        context: setContext(),
+        context: setContext ? setContext() : configurationDefaults.setContext(),
         custom: {
-          isBrowserSupported,
+          isBrowserSupported: isBrowserSupported ?? true,
           languagePreferred: navigator.language,
           languages: navigator.languages.join(', '),
           reportingMethod: 'sendBeacon',
           ...(actionHistory && { actionHistory: JSON.stringify(actionHistory) }),
           ...(applicationState && { applicationState: JSON.stringify(applicationState) }),
           ...(hasConfigurationInPayload && {
-            configuration: { ...serializeConfigurationObject(configuration) },
+            configuration: {
+              ...serializeConfigurationObject(configuration as IConfigurationInternal),
+            },
           }),
           ...(locationInfo && { locationInfo }),
         },
@@ -217,11 +230,11 @@ class RollbarClientSubmitter {
       payloadPreMerge.data.fingerprint = title;
     }
 
-    const payloadMerged = extend(true, payloadPreMerge, customPayloadFields);
+    const payloadMerged = extend(true, payloadPreMerge, customPayloadFields) as IPayload;
     return buildObjectDeepSorted(payloadMerged);
   }
 
-  report(...parameters) {
+  report(...parameters: TSubmitterParameters) {
     // Validate input arguments
     validateReportArguments(...parameters);
 
@@ -241,18 +254,18 @@ class RollbarClientSubmitter {
     // Bail out of reporting if shouldIgnoreOccurrence() returns a truthy value
     const { apiUrl, shouldIgnoreOccurrence } = this.configuration;
     if (
-      typeof shouldIgnoreOccurrence === 'function' &&
-      shouldIgnoreOccurrence(payload, this.configuration)
+      shouldIgnoreOccurrence &&
+      shouldIgnoreOccurrence(payload, this.configuration as IConfigurationInternal)
     ) {
       console.info('[ROLLBAR CLIENT] Ignoring occurrence', payload, this.configuration);
       return;
     }
 
     // Submit occurrence to Rollbar
-    submitOccurrence(apiUrl, payload);
+    submitOccurrence(apiUrl as string, payload);
   }
 
-  shouldSkipDuplicateOccurrence(...parameters) {
+  shouldSkipDuplicateOccurrence(...parameters: TSubmitterParameters) {
     const enumerableArguments = parameters.map((a) =>
       a instanceof Error ? buildEnumerableObject(a) : a,
     );

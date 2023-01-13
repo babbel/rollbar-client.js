@@ -1,9 +1,11 @@
 // External Imports
-import ErrorStackParser from 'error-stack-parser';
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import * as ErrorStackParser from 'error-stack-parser';
 
 // Internal Imports
-import { RollbarClientSubmitter } from './RollbarClientSubmitter.js';
 import { name as expectedlibraryName, version as expectedlibraryVersion } from '../package.json';
+import { RollbarClientSubmitter } from './RollbarClientSubmitter.mjs';
+import type { IConfigurationOptions, IGenericObjectIndexSignature, IPayload } from './types.mjs';
 
 // Local Variables
 const acceptedLogLevels = ['critical', 'debug', 'error', 'info', 'warning'];
@@ -14,7 +16,7 @@ const minimalCorrectConfig = { accessToken: 'abc123', environment: 'test' };
 class TestCustomError extends RangeError {}
 
 // Local Functions
-function buildMinimalPayload() {
+function buildMinimalPayload(): IPayload {
   const { accessToken, environment } = minimalCorrectConfig;
   return {
     access_token: accessToken,
@@ -49,9 +51,11 @@ function buildMinimalPayload() {
   };
 }
 
-function fetchMock() {}
+function fetchMock(): Promise<Response> {
+  return Promise.resolve(new Response());
+}
 
-function getStackFrames(error) {
+function getStackFrames(error: Error) {
   return ErrorStackParser.parse(error).map((frame) => ({
     colno: frame.columnNumber,
     filename: frame.fileName,
@@ -60,19 +64,60 @@ function getStackFrames(error) {
   }));
 }
 
-function sendBeaconMock() {
+function omitFromObject(key: string, object: IGenericObjectIndexSignature) {
+  const { [key]: omitted, ...remaining } = object;
+  return remaining;
+}
+
+function sendBeaconMock(): boolean {
   return true;
 }
 
 // Execute Tests
 describe(`Class: ${RollbarClientSubmitter.name}`, () => {
+  let submitter = new RollbarClientSubmitter(minimalCorrectConfig);
+
+  beforeAll(() => {
+    vi.spyOn(console, 'debug')
+      .mockImplementation(() => {})
+      .mockName('consoleDebugMock');
+    vi.spyOn(console, 'error')
+      .mockImplementation(() => {})
+      .mockName('consoleErrorMock');
+    vi.spyOn(console, 'info')
+      .mockImplementation(() => {})
+      .mockName('consoleInfoMock');
+    vi.spyOn(console, 'warn')
+      .mockImplementation(() => {})
+      .mockName('consoleWarnMock');
+
+    if (typeof navigator.sendBeacon !== 'function') {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- TODO: remove manually setting sendBeacon() once happy-dom supports it natively
+      // @ts-ignore
+      navigator.sendBeacon = sendBeaconMock;
+    }
+    vi.spyOn(navigator, 'sendBeacon').mockImplementation(sendBeaconMock).mockName('sendBeaconMock');
+
+    // Override the user agent so the browsersSupportedRegex feature can be reliably tested
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('happy-dom');
+
+    vi.spyOn(window, 'fetch').mockImplementation(fetchMock).mockName('fetchMock');
+  });
+
+  beforeEach(() => {
+    submitter = new RollbarClientSubmitter(minimalCorrectConfig);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('Class instantiation and configuration', () => {
     const requiredKeys = ['accessToken', 'environment'];
     for (const key of requiredKeys) {
       test(`throws when required configuration key "${key}" is missing`, () => {
-        const badConfig = { ...minimalCorrectConfig };
-        delete badConfig[key];
-        expect(() => new RollbarClientSubmitter(badConfig)).toThrow(
+        const badConfig = omitFromObject(key, minimalCorrectConfig);
+        expect(() => new RollbarClientSubmitter(badConfig as IConfigurationOptions)).toThrow(
           `Configuration key "${key}" is required`,
         );
       });
@@ -84,66 +129,20 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
   });
 
   describe('Error occurrence submission', () => {
-    // Setup lifecycle behavior
-    let submitter;
-
-    beforeAll(() => {
-      jest.spyOn(console, 'debug').mockImplementation().mockName('consoleDebugMock');
-      jest.spyOn(console, 'error').mockImplementation().mockName('consoleErrorMock');
-      jest.spyOn(console, 'info').mockImplementation().mockName('consoleInfoMock');
-      jest.spyOn(console, 'warn').mockImplementation().mockName('consoleWarnMock');
-
-      // Stub and mock features unsupported by Jest
-      if (typeof window.fetch !== 'function') {
-        window.fetch = fetchMock;
-      }
-      jest.spyOn(window, 'fetch').mockImplementation(fetchMock).mockName(fetchMock.name);
-
-      if (typeof navigator.sendBeacon !== 'function') {
-        navigator.sendBeacon = sendBeaconMock;
-      }
-      jest
-        .spyOn(navigator, 'sendBeacon')
-        .mockImplementation(sendBeaconMock)
-        .mockName(sendBeaconMock.name);
-    });
-
-    beforeEach(() => {
-      submitter = new RollbarClientSubmitter(minimalCorrectConfig);
-    });
-
-    afterAll(() => {
-      jest.restoreAllMocks();
-    });
-
-    // Begin Tests
     describe('Validate input arguments: validateReportArgs()', () => {
       describe('All correct log levels are accepted', () => {
         for (const logLevel of acceptedLogLevels) {
-          // eslint-disable-next-line no-loop-func -- "submitter" is block scoped, so this appears to be a false alarm
+          // eslint-disable-next-line @typescript-eslint/no-loop-func -- "submitter" is block scoped, so this appears to be a false alarm
           test(`${logLevel}`, () => {
-            expect(() => submitter.report(logLevel)).not.toThrow();
+            expect(() => submitter.report(logLevel, 'test message')).not.toThrow();
           });
         }
       });
 
       describe('Expected errors', () => {
         test('incorrect log level', () => {
-          expect(() => submitter.report('magic')).toThrow(
+          expect(() => submitter.report('magic', 'test message')).toThrow(
             'Log level can only be one of the following: critical, debug, error, info, warning',
-          );
-        });
-
-        test('error object is not an instance of class "Error"', () => {
-          expect(() =>
-            submitter.report('error', 'test message', { error: 'bad thing happened' }),
-          ).toThrow('Error objects must be an instance of class "Error"');
-        });
-
-        test('actionHistory is not an array', () => {
-          const testError = new Error('test error');
-          expect(() => submitter.report('error', 'test message', testError, {}, {})).toThrow(
-            'actionHistory must be an array',
           );
         });
       });
@@ -175,7 +174,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
     });
 
     describe('Report to the local console: logToConsole()', () => {
-      const remainingArguments = ['test message', new Error('test error')];
+      const remainingArguments: [string, Error] = ['test message', new Error('test error')];
 
       describe('Nothing is logged to the console if configuration option "isVerbose" is set to "false"', () => {
         for (const logLevel of acceptedLogLevels) {
@@ -411,7 +410,10 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           const testMessage = 'test message';
           submitter.report('error', testMessage);
 
-          const actualPayload = JSON.parse(navigator.sendBeacon.mock.calls[0][1]);
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- TODO: determine how to make Vitest allow calling .mock on mocked functions
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access -- see todo above
+          const actualPayload = JSON.parse(navigator.sendBeacon.mock.calls[0][1]) as IPayload;
           const actualLibraryVersion = actualPayload.data.notifier.version;
 
           expect(actualLibraryVersion).toBe(expectedlibraryVersion);
@@ -457,7 +459,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
         });
 
         test('browsersSupportedRegex: user agent match', () => {
-          const browsersSupportedRegex = /jsdom/;
+          const browsersSupportedRegex = /happy-dom/;
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({
             ...minimalCorrectConfig,
@@ -557,7 +559,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
-          // eslint-disable-next-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
+          // eslint-disable-next-line @typescript-eslint/naming-convention -- the library uses these fields, so tests cannot avoid these naming conventions
           const { browser, guess_uncaught_frames, source_map_enabled } =
             payload.data.client.javascript;
           payload.data.body = {
@@ -568,8 +570,8 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           payload.data.client.javascript = {
             browser,
             code_version: commitHash,
-            guess_uncaught_frames, // eslint-disable-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
-            source_map_enabled, // eslint-disable-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
+            guess_uncaught_frames,
+            source_map_enabled,
           };
 
           expect(window.fetch).toHaveBeenCalledTimes(0);
@@ -582,7 +584,9 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             new: { stuff: 'is here' },
           };
           const customPayloadFields = {
-            data: { some },
+            data: {
+              custom: { some },
+            },
           };
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, customPayloadFields });
@@ -609,15 +613,17 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             },
             client,
             context,
-            custom,
+            custom: {
+              ...custom,
+              some,
+            },
             environment,
-            fingerprint,
+            fingerprint: fingerprint as string,
             framework,
             language,
             level,
             notifier,
             platform,
-            some,
             title: testMessage,
           };
 
@@ -630,16 +636,18 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           // Need to JSON.parse() stringified objects to not violoate ESLint sorting rules
           const customPayloadFields = JSON.parse(
             '{"data":{"zAtTheEnd":"its over...","arr":[1,{"two":"three"},4]},"aShouldBeFirst":{"second":"2nd","third":3,"fourth":[4,3,2,1],"fifth":{"really":"deep","object":["sorting","works","ignoring","arrays"]}}}',
-          );
+          ) as IPayload;
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, customPayloadFields });
           submitter.report('error', testMessage);
 
-          // eslint-disable-next-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
+          // eslint-disable-next-line @typescript-eslint/naming-convention -- the library uses these fields, so tests cannot avoid these naming conventions
           const { access_token, data } = buildMinimalPayload();
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- deleting this field is part of the test, so this action is unavoidable
+          // @ts-ignore deleting this field is part of the test, so this action is unavoidable
           delete data.body;
           const payload = {
-            access_token, // eslint-disable-line camelcase -- the library uses these fields, so tests cannot avoid these naming conventions
+            access_token,
             aShouldBeFirst: {
               fifth: {
                 object: ['sorting', 'works', 'ignoring', 'arrays'],
@@ -651,6 +659,8 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             },
             data: {
               arr: [1, { two: 'three' }, 4],
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- creating badly-sorted data is part of this test, TS has to be ignored here
+              // @ts-ignore creating badly-sorted data is part of this test, TS has to be ignored here
               body: {
                 message: {
                   body: testMessage,
@@ -759,7 +769,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             return false;
           }
           const testMessage = 'test message';
-          const browsersSupportedRegex = /jsdom/;
+          const browsersSupportedRegex = /happy-dom/;
           submitter = new RollbarClientSubmitter({
             ...minimalCorrectConfig,
             browsersSupportedRegex,
@@ -939,7 +949,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             context,
             custom,
             environment,
-            fingerprint,
+            fingerprint: fingerprint as string, // Always set in buildMinimalPayload()
             framework,
             language,
             level,
@@ -988,6 +998,8 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
 
       test('sendBeacon() is unavailable, fallback to fetch()', () => {
         const sendBeaconBackup = navigator.sendBeacon;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- deleting a non-optional operand is necessary for this test condition
+        // @ts-ignore deleting a non-optional operand is necessary for this test condition
         delete navigator.sendBeacon;
 
         const testErrorMessage = 'test reference error';
