@@ -65,7 +65,7 @@ function logToConsole(...parameters: TSubmitterParameters) {
     case 'debug':
     case 'error':
     case 'info':
-      // eslint-disable-next-line no-console -- the if() statement is limiting this to the expected allowlist of debug, error, info
+      // eslint-disable-next-line no-console -- the case statements are limiting this to the expected allowlist of debug, error, info
       console[level](`[ROLLBAR ${level.toUpperCase()}]`, ...remainingArguments);
       break;
   }
