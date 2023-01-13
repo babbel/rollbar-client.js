@@ -410,9 +410,9 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           const testMessage = 'test message';
           submitter.report('error', testMessage);
 
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- temporary disable to see CI results
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- TODO: determine how to make Vitest allow calling .mock on mocked functions
           // @ts-ignore
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access -- temporary disable to see CI results
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access -- see todo above
           const actualPayload = JSON.parse(navigator.sendBeacon.mock.calls[0][1]) as IPayload;
           const actualLibraryVersion = actualPayload.data.notifier.version;
 
