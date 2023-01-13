@@ -34,7 +34,7 @@
     "validate:environment:symlinks": "./scripts/npm/validateEnvironmentSymlinks.mjs",
     "validate:environment:versions": "./scripts/npm/validateEnvironmentVersions.mjs",
     "validate:formatting": "prettier --check --cache --no-editorconfig .",
-    "validate:linting:eslint": "eslint-config-prettier src/RollbarClient.ts"
+    "validate:linting:eslint": "eslint-config-prettier src/RollbarClient.mts"
   },
   "bundleDependencies": [
     "error-stack-parser",
