@@ -1,8 +1,8 @@
 {
   "name": "@lessonnine/rollbar-client.js",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": "Eric L. Goldstein <egoldstein@babbel.com>",
-  "description": "Tiny, modern Rollbar JavaScript client whose code is mostly lazy-loaded if and when an error occurs",
+  "description": "Tiny, modern Rollbar TypeScript client whose code is mostly lazy-loaded if and when an error occurs",
   "engines": {
     "node": ">=16.13.0"
   },
@@ -11,8 +11,7 @@
     "dist/"
   ],
   "exports": {
-    "import": "./dist/RollbarClient.min.mjs",
-    "require": "./dist/RollbarClient.min.cjs"
+    "import": "./dist/RollbarClient.mjs"
   },
   "scripts": {
     "build": "npm-run-all --silent validate:environment list:todo-comments build:vite build:types",

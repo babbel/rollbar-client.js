@@ -3,8 +3,7 @@ import { beforeAll, describe, expect, test, vi } from 'vitest';
 
 // Internal Imports
 import { RollbarClient } from './RollbarClient.mjs';
-import type { IConfigurationOptions } from './interfaces.mjs';
-import type { TSubmitterParameters } from './types.mjs';
+import type { IConfigurationOptions, TSubmitterParameters } from './types.mjs';
 
 // Module Mocks
 vi.mock('./RollbarClientSubmitter', () => {

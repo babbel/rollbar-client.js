@@ -5,11 +5,7 @@ import * as ErrorStackParser from 'error-stack-parser';
 // Internal Imports
 import { name as expectedlibraryName, version as expectedlibraryVersion } from '../package.json';
 import { RollbarClientSubmitter } from './RollbarClientSubmitter.mjs';
-import type {
-  IConfigurationOptions,
-  IGenericObjectIndexSignature,
-  IPayload,
-} from './interfaces.mjs';
+import type { IConfigurationOptions, IGenericObjectIndexSignature, IPayload } from './types.mjs';
 
 // Local Variables
 const acceptedLogLevels = ['critical', 'debug', 'error', 'info', 'warning'];
