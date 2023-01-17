@@ -633,10 +633,17 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
         });
 
         test('customPayloadFields, payload is correctly deep-sorted alphabetically', () => {
-          // Need to JSON.parse() stringified objects to not violoate ESLint sorting rules
-          const customPayloadFields = JSON.parse(
-            '{"data":{"zAtTheEnd":"its over...","arr":[1,{"two":"three"},4]},"aShouldBeFirst":{"second":"2nd","third":3,"fourth":[4,3,2,1],"fifth":{"really":"deep","object":["sorting","works","ignoring","arrays"]}}}',
-          ) as IPayload;
+          const customPayloadFields = {
+            data: { zAtTheEnd: 'its over...', arr: [1, { two: 'three' }, 4] }, // eslint-disable-line sort-keys -- this test requires improperly sorted data
+            // eslint-disable-next-line sort-keys -- this test requires improperly sorted data
+            aShouldBeFirst: {
+              second: '2nd',
+              third: 3,
+              fourth: [4, 3, 2, 1], // eslint-disable-line sort-keys -- this test requires improperly sorted data
+              fifth: { really: 'deep', object: ['sorting', 'works', 'ignoring', 'arrays'] }, // eslint-disable-line sort-keys -- this test requires improperly sorted data
+            },
+          };
+
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, customPayloadFields });
           submitter.report('error', testMessage);
