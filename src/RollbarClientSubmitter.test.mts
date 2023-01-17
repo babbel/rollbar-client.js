@@ -5,7 +5,7 @@ import * as ErrorStackParser from 'error-stack-parser';
 // Internal Imports
 import { name as expectedlibraryName, version as expectedlibraryVersion } from '../package.json';
 import { RollbarClientSubmitter } from './RollbarClientSubmitter.mjs';
-import type { IConfigurationOptions, IGenericObjectIndexSignature, IPayload } from './types.mjs';
+import type { IConfigurationOptions, IPayload } from './types.mjs';
 
 // Local Variables
 const acceptedLogLevels = ['critical', 'debug', 'error', 'info', 'warning'];
@@ -64,7 +64,7 @@ function getStackFrames(error: Error) {
   }));
 }
 
-function omitFromObject(key: string, object: IGenericObjectIndexSignature) {
+function omitFromObject(key: string, object: Record<string, any>) {
   const { [key]: omitted, ...remaining } = object;
   return remaining;
 }

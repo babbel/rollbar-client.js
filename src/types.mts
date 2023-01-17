@@ -2,7 +2,12 @@
 // eslint-disable-next-line @typescript-eslint/ban-types -- only interested in allowing functions not matching their shape
 type TConfigurationObjectValue = string | RegExp | object | boolean | Function;
 
-type TCustomConfiguration = Omit<IConfigurationInternal, 'accessToken'>;
+type TCustomConfiguration = Omit<IConfigurationInternal, 'accessToken'> & {
+  onUnhandledError?: string;
+  onUnhandledPromiseRejection?: string;
+};
+
+type TLogLevels = 'critical' | 'debug' | 'error' | 'info' | 'warning';
 
 type TSerializedObject<T extends object> = {
   // eslint-disable-next-line @typescript-eslint/ban-types -- any function can be expected here
@@ -10,7 +15,7 @@ type TSerializedObject<T extends object> = {
 };
 
 type TSubmitterParameters = [
-  string,
+  TLogLevels,
   string,
   Error?,
   object?,
@@ -56,10 +61,6 @@ interface IConfigurationInternal {
   userInfo?: object;
 }
 
-interface IGenericObjectIndexSignature {
-  [key: string]: any;
-}
-
 interface IPayload {
   access_token: string;
   data: {
@@ -103,7 +104,6 @@ interface IPayload {
 export type {
   IConfigurationInternal,
   IConfigurationOptions,
-  IGenericObjectIndexSignature,
   IPayload,
   TConfigurationObjectValue,
   TSubmitterParameters,
