@@ -618,7 +618,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
               some,
             },
             environment,
-            fingerprint: fingerprint as string,
+            fingerprint,
             framework,
             language,
             level,
