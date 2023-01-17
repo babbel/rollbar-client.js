@@ -174,7 +174,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
     });
 
     describe('Report to the local console: logToConsole()', () => {
-      const remainingArguments: [string, Error] = ['test message', new Error('test error')];
+      const remainingArguments = ['test message', new Error('test error')] as const;
 
       describe('Nothing is logged to the console if configuration option "isVerbose" is set to "false"', () => {
         for (const logLevel of acceptedLogLevels) {
