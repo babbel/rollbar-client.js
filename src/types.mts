@@ -2,10 +2,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-types -- only interested in allowing functions not matching their shape
 type TConfigurationObjectValue = string | RegExp | object | boolean | Function;
 
-type TCustomConfiguration = Omit<IConfigurationInternal, 'accessToken'> & {
-  onUnhandledError?: string;
-  onUnhandledPromiseRejection?: string;
-};
+type TCustomConfiguration = Omit<IConfigurationInternal, 'accessToken'>;
 
 type TSerializedObject<T extends object> = {
   // eslint-disable-next-line @typescript-eslint/ban-types -- any function can be expected here
