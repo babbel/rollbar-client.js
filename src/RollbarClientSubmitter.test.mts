@@ -5,10 +5,10 @@ import * as ErrorStackParser from 'error-stack-parser';
 // Internal Imports
 import { name as expectedlibraryName, version as expectedlibraryVersion } from '../package.json';
 import { RollbarClientSubmitter } from './RollbarClientSubmitter.mjs';
-import type { IConfigurationOptions, IPayload } from './types.mjs';
+import type { IConfigurationOptions, IPayload, TLogLevels } from './types.mjs';
 
 // Local Variables
-const acceptedLogLevels = ['critical', 'debug', 'error', 'info', 'warning'];
+const acceptedLogLevels: TLogLevels[] = ['critical', 'debug', 'error', 'info', 'warning'];
 const defaultApiUrl = 'https://api.rollbar.com/api/1/item/';
 const minimalCorrectConfig = { accessToken: 'abc123', environment: 'test' };
 
@@ -141,6 +141,8 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
 
       describe('Expected errors', () => {
         test('incorrect log level', () => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- allow invalid report level string because that's the point of this test (some users wont be using TS)
+          // @ts-ignore
           expect(() => submitter.report('magic', 'test message')).toThrow(
             'Log level can only be one of the following: critical, debug, error, info, warning',
           );

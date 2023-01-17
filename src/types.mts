@@ -106,5 +106,6 @@ export type {
   IConfigurationOptions,
   IPayload,
   TConfigurationObjectValue,
+  TLogLevels,
   TSubmitterParameters,
 };
