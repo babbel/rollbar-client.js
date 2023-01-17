@@ -1,5 +1,6 @@
 // Local Types
-type TConfigurationObjectValue = string | RegExp | object | boolean | typeof Function;
+// eslint-disable-next-line @typescript-eslint/ban-types -- only interested in allowing functions not matching their shape
+type TConfigurationObjectValue = string | RegExp | object | boolean | Function;
 
 type TCustomConfiguration = Omit<IConfigurationInternal, 'accessToken'> & {
   onUnhandledError?: string;
