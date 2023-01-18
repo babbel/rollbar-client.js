@@ -123,7 +123,7 @@ function validateReportArguments(...parameters: TSubmitterParameters) {
 
 // Class Definition
 class RollbarClientSubmitter {
-  configuration: IConfigurationOptions;
+  configuration: IConfigurationOptions & typeof configurationDefaults;
   errorHistory: Array<object>; // TODO: add more specific object shape
 
   constructor(configurationOptions: IConfigurationOptions) {
@@ -159,9 +159,7 @@ class RollbarClientSubmitter {
       setContext,
       userInfo,
     } = configuration;
-    const title = `${
-      isBrowserSupported ? '' : (browserUnsupportedTitlePrefix as string)
-    }${titleText}`;
+    const title = `${isBrowserSupported ? '' : browserUnsupportedTitlePrefix}${titleText}`;
 
     // Build the payload's body object depending on whether or not an error object is passed in
     const body =
@@ -262,7 +260,7 @@ class RollbarClientSubmitter {
     }
 
     // Submit occurrence to Rollbar
-    submitOccurrence(apiUrl as string, payload);
+    submitOccurrence(apiUrl, payload);
   }
 
   shouldSkipDuplicateOccurrence(...parameters: TSubmitterParameters) {

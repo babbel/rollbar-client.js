@@ -32,17 +32,15 @@ class RollbarClient {
     this.submitter.report(...parameters);
   }
 
-  onErrorDefault = async (errorEvent: ErrorEvent) => {
-    await this.log('warning', 'Unhandled error occurred', errorEvent.error as Error);
-  };
+  onErrorDefault = (errorEvent: ErrorEvent) =>
+    this.log('warning', 'Unhandled error occurred', errorEvent.error as Error);
 
-  onUnhandledRejectionDefault = async (promiseRejectionEvent: PromiseRejectionEvent) => {
-    await this.log(
+  onUnhandledRejectionDefault = (promiseRejectionEvent: PromiseRejectionEvent) =>
+    this.log(
       'warning',
       'Unhandled promise rejection occurred',
       promiseRejectionEvent.reason as Error,
     );
-  };
 }
 
 // Module Exports
