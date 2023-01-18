@@ -1,5 +1,5 @@
 {
-  "name": "@lessonnine/rollbar-client.js",
+  "name": "@babbel/rollbar-client.js",
   "version": "2.0.0",
   "author": "Eric L. Goldstein <egoldstein@babbel.com>",
   "description": "Tiny, modern Rollbar TypeScript client whose code is mostly lazy-loaded if and when an error occurs",
