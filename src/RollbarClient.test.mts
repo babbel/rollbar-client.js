@@ -5,6 +5,18 @@ import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { RollbarClient } from './RollbarClient.mjs';
 import type { IConfigurationOptions, TSubmitterParameters } from './types.mjs';
 
+// Local Types
+type TEventListenerUnhandledError =
+  | ((errorEvent: ErrorEvent) => Promise<void>)
+  | (() => Promise<Promise<void>>);
+type TEventListenerUnhandledPromiseRejection =
+  | (() => Promise<Promise<void>>)
+  | ((promiseRejectionEvent: PromiseRejectionEvent) => Promise<void>);
+
+// Local Variables
+const onErrorDefault: TEventListenerUnhandledError = async () => {};
+const onUnhandledRejectionDefault: TEventListenerUnhandledPromiseRejection = async () => {};
+
 // Module Mocks
 vi.mock('./RollbarClientSubmitter', () => {
   const RollbarClientSubmitter = vi.fn();
@@ -139,8 +151,10 @@ describe(`Class: ${RollbarClient.name}`, () => {
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
-      vi.spyOn(client, 'onErrorDefault').mockImplementation(() => {});
-      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(() => {});
+      vi.spyOn(client, 'onErrorDefault').mockImplementation(onErrorDefault);
+      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(
+        onUnhandledRejectionDefault,
+      );
       client.initializeEventListeners();
       window.dispatchEvent(errorEvent);
       window.dispatchEvent(unhandledRejectionEvent);
@@ -157,8 +171,10 @@ describe(`Class: ${RollbarClient.name}`, () => {
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
-      vi.spyOn(client, 'onErrorDefault').mockImplementation(() => {});
-      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(() => {});
+      vi.spyOn(client, 'onErrorDefault').mockImplementation(onErrorDefault);
+      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(
+        onUnhandledRejectionDefault,
+      );
       client.initializeEventListeners();
       window.dispatchEvent(errorEvent);
       window.dispatchEvent(unhandledRejectionEvent);
@@ -180,8 +196,10 @@ describe(`Class: ${RollbarClient.name}`, () => {
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
-      vi.spyOn(client, 'onErrorDefault').mockImplementation(() => {});
-      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(() => {});
+      vi.spyOn(client, 'onErrorDefault').mockImplementation(onErrorDefault);
+      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(
+        onUnhandledRejectionDefault,
+      );
       client.initializeEventListeners();
       window.dispatchEvent(errorEvent);
       window.dispatchEvent(unhandledRejectionEvent);
@@ -205,8 +223,10 @@ describe(`Class: ${RollbarClient.name}`, () => {
       const client = new RollbarClient(configuration);
       const errorEvent = new Event('error');
       const unhandledRejectionEvent = new Event('unhandledrejection');
-      vi.spyOn(client, 'onErrorDefault').mockImplementation(() => {});
-      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(() => {});
+      vi.spyOn(client, 'onErrorDefault').mockImplementation(onErrorDefault);
+      vi.spyOn(client, 'onUnhandledRejectionDefault').mockImplementation(
+        onUnhandledRejectionDefault,
+      );
       client.initializeEventListeners();
       window.dispatchEvent(errorEvent);
       window.dispatchEvent(unhandledRejectionEvent);
