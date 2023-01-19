@@ -16,13 +16,18 @@
 
   "overrides": [
     {
+      "files": ["src/*.mts"],
+      "rules": {
+        "import/extensions": "off"
+      }
+    },
+    {
       "files": ["src/RollbarClient*.mts"],
       "env": {
         "browser": true
       },
       "rules": {
         "@typescript-eslint/unbound-method": "off",
-        "import/extensions": "off",
         "no-console": ["error", { "allow": ["debug", "error", "info", "warn"] }],
         "unicorn/filename-case": ["error", { "case": "pascalCase" }]
       }

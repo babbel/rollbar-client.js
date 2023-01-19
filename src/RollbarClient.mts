@@ -29,7 +29,7 @@ class RollbarClient {
       const { RollbarClientSubmitter } = await import('./RollbarClientSubmitter.mjs');
       this.submitter = new RollbarClientSubmitter(this.configuration);
     }
-    this.submitter.report(...parameters);
+    await this.submitter.report(...parameters);
   }
 
   onErrorDefault = (errorEvent: ErrorEvent) =>

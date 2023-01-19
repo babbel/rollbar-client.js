@@ -151,12 +151,14 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
     });
 
     describe('Prevent duplicate errors from being submitted: this.shouldSkipDuplicateOccurrence()', () => {
-      test('duplicate errors are skipped', () => {
+      test('duplicate errors are skipped', async () => {
         const duplicateCount = 6;
+        const reportPromises = [] as Promise<void>[];
         // eslint-disable-next-line no-plusplus -- needed for the for() loop
         for (let index = 0; index < duplicateCount + 1; ++index) {
-          submitter.report('error', 'test message', new Error('test error'));
+          reportPromises.push(submitter.report('error', 'test message', new Error('test error')));
         }
+        await Promise.all(reportPromises);
 
         expect(window.fetch).toHaveBeenCalledTimes(0);
         expect(navigator.sendBeacon).toHaveBeenCalledTimes(1);
@@ -180,12 +182,12 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
 
       describe('Nothing is logged to the console if configuration option "isVerbose" is set to "false"', () => {
         for (const logLevel of acceptedLogLevels) {
-          test(`log level "${logLevel}"`, () => {
+          test(`log level "${logLevel}"`, async () => {
             const clientSubmitter = new RollbarClientSubmitter({
               ...minimalCorrectConfig,
               isVerbose: false,
             });
-            clientSubmitter.report(logLevel, ...remainingArguments);
+            await clientSubmitter.report(logLevel, ...remainingArguments);
             expect(console.debug).toHaveBeenCalledTimes(0);
             expect(console.error).toHaveBeenCalledTimes(0);
             expect(console.info).toHaveBeenCalledTimes(0);
@@ -195,8 +197,8 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
       });
 
       describe('Log to the console by default for each log level', () => {
-        test('log level "critical"', () => {
-          submitter.report('critical', ...remainingArguments);
+        test('log level "critical"', async () => {
+          await submitter.report('critical', ...remainingArguments);
           expect(console.debug).toHaveBeenCalledTimes(0);
           expect(console.error).toHaveBeenCalledTimes(1);
           expect(console.info).toHaveBeenCalledTimes(0);
@@ -204,8 +206,8 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(console.error).toHaveBeenCalledWith('[ROLLBAR CRITICAL]', ...remainingArguments);
         });
 
-        test('log level "debug"', () => {
-          submitter.report('debug', ...remainingArguments);
+        test('log level "debug"', async () => {
+          await submitter.report('debug', ...remainingArguments);
           expect(console.debug).toHaveBeenCalledTimes(1);
           expect(console.error).toHaveBeenCalledTimes(0);
           expect(console.info).toHaveBeenCalledTimes(0);
@@ -213,8 +215,8 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(console.debug).toHaveBeenCalledWith('[ROLLBAR DEBUG]', ...remainingArguments);
         });
 
-        test('log level "error"', () => {
-          submitter.report('error', ...remainingArguments);
+        test('log level "error"', async () => {
+          await submitter.report('error', ...remainingArguments);
           expect(console.debug).toHaveBeenCalledTimes(0);
           expect(console.error).toHaveBeenCalledTimes(1);
           expect(console.info).toHaveBeenCalledTimes(0);
@@ -222,8 +224,8 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(console.error).toHaveBeenCalledWith('[ROLLBAR ERROR]', ...remainingArguments);
         });
 
-        test('log level "info"', () => {
-          submitter.report('info', ...remainingArguments);
+        test('log level "info"', async () => {
+          await submitter.report('info', ...remainingArguments);
           expect(console.debug).toHaveBeenCalledTimes(0);
           expect(console.error).toHaveBeenCalledTimes(0);
           expect(console.info).toHaveBeenCalledTimes(1);
@@ -231,8 +233,8 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(console.info).toHaveBeenCalledWith('[ROLLBAR INFO]', ...remainingArguments);
         });
 
-        test('log level "warning"', () => {
-          submitter.report('warning', ...remainingArguments);
+        test('log level "warning"', async () => {
+          await submitter.report('warning', ...remainingArguments);
           expect(console.debug).toHaveBeenCalledTimes(0);
           expect(console.error).toHaveBeenCalledTimes(0);
           expect(console.info).toHaveBeenCalledTimes(0);
@@ -244,9 +246,9 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
 
     describe('Build the payload to submit to Rollbar: this.buildPayload()', () => {
       describe('Minimal configuration', () => {
-        test('error object not passed (without applicationState or actionHistory)', () => {
+        test('error object not passed (without applicationState or actionHistory)', async () => {
           const testMessage = 'test message';
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -260,11 +262,11 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('error object passed (without applicationState or actionHistory)', () => {
+        test('error object passed (without applicationState or actionHistory)', async () => {
           const testErrorMessage = 'test error';
           const testError = new TypeError(testErrorMessage);
           const testMessage = 'test message';
-          submitter.report('error', testMessage, testError);
+          await submitter.report('error', testMessage, testError);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -285,11 +287,11 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('custom class-derived error object passed, its class name is detected correctly (without applicationState or actionHistory)', () => {
+        test('custom class-derived error object passed, its class name is detected correctly (without applicationState or actionHistory)', async () => {
           const testErrorMessage = 'test error';
           const testError = new TestCustomError(testErrorMessage);
           const testMessage = 'test message';
-          submitter.report('error', testMessage, testError);
+          await submitter.report('error', testMessage, testError);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -310,12 +312,12 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('error object passed (with applicationState, without actionHistory)', () => {
+        test('error object passed (with applicationState, without actionHistory)', async () => {
           const applicationState = { isLoggedIn: false };
           const testErrorMessage = 'test error';
           const testError = new Error(testErrorMessage);
           const testMessage = 'test message';
-          submitter.report('error', testMessage, testError, applicationState);
+          await submitter.report('error', testMessage, testError, applicationState);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -340,7 +342,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('error object passed (without applicationState, with actionHistory)', () => {
+        test('error object passed (without applicationState, with actionHistory)', async () => {
           const actionHistory = [
             { type: 'LOGIN_SUBMIT_START' },
             { payload: { username: 'testGuy' }, type: 'LOGIN_SUBMIT_SUCCESS' },
@@ -348,7 +350,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           const testErrorMessage = 'test error';
           const testError = new TypeError(testErrorMessage);
           const testMessage = 'test message';
-          submitter.report('error', testMessage, testError, undefined, actionHistory);
+          await submitter.report('error', testMessage, testError, undefined, actionHistory);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -373,7 +375,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('error object passed (with applicationState and actionHistory)', () => {
+        test('error object passed (with applicationState and actionHistory)', async () => {
           const actionHistory = [
             { type: 'LOGIN_SUBMIT_START' },
             { payload: { username: 'testGuy' }, type: 'LOGIN_SUBMIT_SUCCESS' },
@@ -382,7 +384,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           const testErrorMessage = 'test error';
           const testError = new Error(testErrorMessage);
           const testMessage = 'test message';
-          submitter.report('error', testMessage, testError, applicationState, actionHistory);
+          await submitter.report('error', testMessage, testError, applicationState, actionHistory);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -408,9 +410,9 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('reported library version matches expectation', () => {
+        test('reported library version matches expectation', async () => {
           const testMessage = 'test message';
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- TODO: determine how to make Vitest allow calling .mock on mocked functions
           // @ts-ignore
@@ -423,11 +425,11 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
       });
 
       describe('Configuration options', () => {
-        test('accessToken', () => {
+        test('accessToken', async () => {
           const accessToken = 'some_access_token';
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, accessToken });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -442,11 +444,11 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('apiUrl', () => {
+        test('apiUrl', async () => {
           const testApiUrl = 'https://other.api.rollbar-compatible.biz/occurrence';
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, apiUrl: testApiUrl });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -460,14 +462,14 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(testApiUrl, JSON.stringify(payload));
         });
 
-        test('browsersSupportedRegex: user agent match', () => {
+        test('browsersSupportedRegex: user agent match', async () => {
           const browsersSupportedRegex = /happy-dom/;
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({
             ...minimalCorrectConfig,
             browsersSupportedRegex,
           });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -481,7 +483,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('browsersSupportedRegex: user agent miss', () => {
+        test('browsersSupportedRegex: user agent miss', async () => {
           const browsersSupportedRegex = /userAgentMiss/;
           const testMessage = 'test message';
           const unsupportedBrowserTestMessage = `[UNSUPPORTED BROWSER] ${testMessage}`;
@@ -489,7 +491,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             ...minimalCorrectConfig,
             browsersSupportedRegex,
           });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -506,14 +508,14 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('browserUnsupportedTitlePrefix: user agent match', () => {
+        test('browserUnsupportedTitlePrefix: user agent match', async () => {
           const browserUnsupportedTitlePrefix = 'TEST_PREFIX:';
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({
             ...minimalCorrectConfig,
             browserUnsupportedTitlePrefix,
           });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -527,7 +529,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('browserUnsupportedTitlePrefix: user agent miss', () => {
+        test('browserUnsupportedTitlePrefix: user agent miss', async () => {
           const browserUnsupportedTitlePrefix = 'TEST_PREFIX:';
           const browsersSupportedRegex = /userAgentMiss/;
           const testMessage = 'test message';
@@ -537,7 +539,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             browsersSupportedRegex,
             browserUnsupportedTitlePrefix,
           });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -554,11 +556,11 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('commitHash', () => {
+        test('commitHash', async () => {
           const commitHash = 'abcdef1234567890';
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, commitHash });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           // eslint-disable-next-line @typescript-eslint/naming-convention -- the library uses these fields, so tests cannot avoid these naming conventions
@@ -581,7 +583,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('customPayloadFields', () => {
+        test('customPayloadFields', async () => {
           const some = {
             new: { stuff: 'is here' },
           };
@@ -592,7 +594,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           };
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, customPayloadFields });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           const {
@@ -634,7 +636,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('customPayloadFields, payload is correctly deep-sorted alphabetically', () => {
+        test('customPayloadFields, payload is correctly deep-sorted alphabetically', async () => {
           const customPayloadFields = {
             data: { zAtTheEnd: 'its over...', arr: [1, { two: 'three' }, 4] }, // eslint-disable-line sort-keys -- this test requires improperly sorted data
             // eslint-disable-next-line sort-keys -- this test requires improperly sorted data
@@ -648,7 +650,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
 
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, customPayloadFields });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           // eslint-disable-next-line @typescript-eslint/naming-convention -- the library uses these fields, so tests cannot avoid these naming conventions
           const { access_token, data } = buildMinimalPayload();
@@ -685,11 +687,11 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('environment', () => {
+        test('environment', async () => {
           const environment = 'test_environment';
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, environment });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -704,11 +706,11 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('fingerprint: passed-in string used', () => {
+        test('fingerprint: passed-in string used', async () => {
           const fingerprint = 'test_fingerprint';
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, fingerprint });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -723,10 +725,10 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('fingerprint: defaults to the value of "title" if not passed in', () => {
+        test('fingerprint: defaults to the value of "title" if not passed in', async () => {
           const testMessage = 'test message for fingerprint';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -742,10 +744,10 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('fingerprint: can be disabled', () => {
+        test('fingerprint: can be disabled', async () => {
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, fingerprint: false });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -760,7 +762,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('hasConfigurationInPayload', () => {
+        test('hasConfigurationInPayload', async () => {
           // eslint-disable-next-line unicorn/consistent-function-scoping -- colocate this with other test setup for clarity
           function onUnhandledError() {
             return 'some unhandled error';
@@ -788,7 +790,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             setContext,
             shouldIgnoreOccurrence,
           });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           const { isBrowserSupported, languagePreferred, languages, reportingMethod } =
@@ -826,14 +828,14 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
 
         // isVerbose: tested in the logToConsole() section
 
-        test('locationInfo', () => {
+        test('locationInfo', async () => {
           const locationInfo = {
             city: 'New York',
             country: 'USA',
           };
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, locationInfo });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           const { isBrowserSupported, languagePreferred, languages, reportingMethod } =
@@ -859,7 +861,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
         // onUnhandledError: tested in RollbarClient.test.js
         // onUnhandledPromiseRejection: tested in RollbarClient.test.js
 
-        test('setContext', () => {
+        test('setContext', async () => {
           const contextString = 'page/1#logging-in';
           function setContext() {
             return contextString;
@@ -870,7 +872,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             setContext,
           };
           submitter = new RollbarClientSubmitter(rollbarConfiguration);
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -885,7 +887,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
         });
 
-        test('shouldIgnoreOccurrence', () => {
+        test('shouldIgnoreOccurrence', async () => {
           function setContext() {
             return window.location.href;
           }
@@ -906,7 +908,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             shouldIgnoreOccurrence,
           };
           submitter = new RollbarClientSubmitter(rollbarConfiguration);
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           payload.data.body = {
@@ -925,7 +927,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledTimes(0);
         });
 
-        test('userInfo', () => {
+        test('userInfo', async () => {
           const userInfo = {
             email: 'test@run.biz',
             id: 'abcdef1234567890',
@@ -933,7 +935,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           };
           const testMessage = 'test message';
           submitter = new RollbarClientSubmitter({ ...minimalCorrectConfig, userInfo });
-          submitter.report('error', testMessage);
+          await submitter.report('error', testMessage);
 
           const payload = buildMinimalPayload();
           const {
@@ -978,11 +980,11 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
     // Bail out of reporting if shouldIgnoreOccurrence() returns a truthy value: tested above
 
     describe('Submit occurrence to Rollbar: submitOccurrence()', () => {
-      test('sendBeacon() submits correctly', () => {
+      test('sendBeacon() submits correctly', async () => {
         const testErrorMessage = 'test syntax error';
         const testError = new SyntaxError(testErrorMessage);
         const testMessage = 'test message for test syntax error';
-        submitter.report('error', testMessage, testError);
+        await submitter.report('error', testMessage, testError);
 
         const payload = buildMinimalPayload();
         payload.data.title = testMessage;
@@ -1005,7 +1007,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
         expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
       });
 
-      test('sendBeacon() is unavailable, fallback to fetch()', () => {
+      test('sendBeacon() is unavailable, fallback to fetch()', async () => {
         const sendBeaconBackup = navigator.sendBeacon;
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- deleting a non-optional operand is necessary for this test condition
         // @ts-ignore deleting a non-optional operand is necessary for this test condition
@@ -1014,7 +1016,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
         const testErrorMessage = 'test reference error';
         const testError = new ReferenceError(testErrorMessage);
         const testMessage = 'test message for test reference error';
-        submitter.report('error', testMessage, testError);
+        await submitter.report('error', testMessage, testError);
 
         const payload = buildMinimalPayload();
         payload.data.custom.reportingMethod = 'fetch';

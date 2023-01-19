@@ -1,8 +1,16 @@
+// Local Imports
+import type { configurationDefaults } from './RollbarClientSubmitter.mjs';
+
 // Local Types
 // eslint-disable-next-line @typescript-eslint/ban-types -- only interested in allowing functions not matching their shape
 type TConfigurationObjectValue = string | RegExp | object | boolean | Function;
 
-type TCustomConfiguration = Omit<IConfigurationInternal, 'accessToken'> & {
+type TConfigurationOptionsWithDefaults = IConfigurationOptions & typeof configurationDefaults;
+
+type TCustomConfiguration = Omit<
+  IConfigurationOptions,
+  'accessToken' | 'onUnhandledError' | 'onUnhandledPromiseRejection'
+> & {
   onUnhandledError?: string;
   onUnhandledPromiseRejection?: string;
 };
@@ -39,25 +47,7 @@ interface IConfigurationOptions {
   onUnhandledError?: false | ((errorEvent: ErrorEvent) => void);
   onUnhandledPromiseRejection?: false | ((promiseRejectionEvent: PromiseRejectionEvent) => void);
   setContext?: () => string;
-  shouldIgnoreOccurrence?: (payload: IPayload, configuration: IConfigurationInternal) => boolean;
-  userInfo?: object;
-}
-
-interface IConfigurationInternal {
-  accessToken: string;
-  apiUrl: string;
-  browsersSupportedRegex: RegExp;
-  browserUnsupportedTitlePrefix: string;
-  commitHash?: string;
-  customPayloadFields?: object;
-  environment: string;
-  fingerprint?: string | false;
-  hasConfigurationInPayload?: boolean;
-  isBrowserSupported: boolean;
-  isVerbose: boolean;
-  locationInfo?: object;
-  setContext: () => string;
-  shouldIgnoreOccurrence: (payload: IPayload, configuration: IConfigurationInternal) => boolean;
+  shouldIgnoreOccurrence?: (payload: IPayload, configuration: IConfigurationOptions) => boolean;
   userInfo?: object;
 }
 
@@ -102,10 +92,10 @@ interface IPayload {
 
 // Module Exports
 export type {
-  IConfigurationInternal,
   IConfigurationOptions,
   IPayload,
   TConfigurationObjectValue,
+  TConfigurationOptionsWithDefaults,
   TLogLevels,
   TSubmitterParameters,
 };

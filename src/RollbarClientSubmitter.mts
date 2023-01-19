@@ -4,9 +4,9 @@ import extend from 'just-extend';
 
 // Internal Imports
 import type {
-  IConfigurationInternal,
   IConfigurationOptions,
   IPayload,
+  TConfigurationOptionsWithDefaults,
   TSubmitterParameters,
 } from './types.mjs';
 
@@ -92,7 +92,7 @@ function serializeConfigurationObject(configObject: IConfigurationOptions) {
   return serializedConfigObject;
 }
 
-function submitOccurrence(url: string, payload: IPayload) {
+async function submitOccurrence(url: string, payload: IPayload) {
   if (typeof navigator.sendBeacon === 'function') {
     const isSubmitSuccessful = navigator.sendBeacon(url, JSON.stringify(payload));
     if (isSubmitSuccessful) {
@@ -104,13 +104,13 @@ function submitOccurrence(url: string, payload: IPayload) {
   // Fall back to using fetch() if the client doesn't support navigator.sendBeacon()
   // eslint-disable-next-line no-param-reassign -- TODO: remove the dual-mode fetch/sendBeacon ability, choose one
   payload.data.custom.reportingMethod = 'fetch';
-  fetch(url, {
+  await fetch(url, {
     body: JSON.stringify(payload),
     cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },
     keepalive: true,
     method: 'POST',
-  }).catch(() => {});
+  });
 }
 
 function validateReportArguments(...parameters: TSubmitterParameters) {
@@ -123,7 +123,7 @@ function validateReportArguments(...parameters: TSubmitterParameters) {
 
 // Class Definition
 class RollbarClientSubmitter {
-  configuration: IConfigurationOptions & typeof configurationDefaults;
+  configuration: TConfigurationOptionsWithDefaults;
   errorHistory: Array<object>; // TODO: add more specific object shape
 
   constructor(configurationOptions: IConfigurationOptions) {
@@ -202,7 +202,7 @@ class RollbarClientSubmitter {
           ...(applicationState && { applicationState: JSON.stringify(applicationState) }),
           ...(hasConfigurationInPayload && {
             configuration: {
-              ...serializeConfigurationObject(configuration as IConfigurationInternal),
+              ...serializeConfigurationObject(configuration),
             },
           }),
           ...(locationInfo && { locationInfo }),
@@ -232,7 +232,7 @@ class RollbarClientSubmitter {
     return buildObjectDeepSorted(payloadMerged);
   }
 
-  report(...parameters: TSubmitterParameters) {
+  async report(...parameters: TSubmitterParameters) {
     // Validate input arguments
     validateReportArguments(...parameters);
 
@@ -251,16 +251,13 @@ class RollbarClientSubmitter {
 
     // Bail out of reporting if shouldIgnoreOccurrence() returns a truthy value
     const { apiUrl, shouldIgnoreOccurrence } = this.configuration;
-    if (
-      shouldIgnoreOccurrence &&
-      shouldIgnoreOccurrence(payload, this.configuration as IConfigurationInternal)
-    ) {
+    if (shouldIgnoreOccurrence && shouldIgnoreOccurrence(payload, this.configuration)) {
       console.info('[ROLLBAR CLIENT] Ignoring occurrence', payload, this.configuration);
       return;
     }
 
     // Submit occurrence to Rollbar
-    submitOccurrence(apiUrl, payload);
+    await submitOccurrence(apiUrl, payload);
   }
 
   shouldSkipDuplicateOccurrence(...parameters: TSubmitterParameters) {
@@ -282,4 +279,4 @@ class RollbarClientSubmitter {
 }
 
 // Module Exports
-export { RollbarClientSubmitter };
+export { configurationDefaults, RollbarClientSubmitter };
