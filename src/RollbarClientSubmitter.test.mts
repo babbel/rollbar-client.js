@@ -133,17 +133,17 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
       describe('All correct log levels are accepted', () => {
         for (const logLevel of acceptedLogLevels) {
           // eslint-disable-next-line @typescript-eslint/no-loop-func -- "submitter" is block scoped, so this appears to be a false alarm
-          test(`${logLevel}`, () => {
-            expect(() => submitter.report(logLevel, 'test message')).not.toThrow();
+          test(`${logLevel}`, async () => {
+            await expect(submitter.report(logLevel, 'test message')).resolves.not.toThrow();
           });
         }
       });
 
       describe('Expected errors', () => {
-        test('incorrect log level', () => {
+        test('incorrect log level', async () => {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- allow invalid report level string because that's the point of this test (some users wont be using TS)
           // @ts-ignore
-          expect(() => submitter.report('magic', 'test message')).toThrow(
+          await expect(submitter.report('magic', 'test message')).rejects.toThrow(
             'Log level can only be one of the following: critical, debug, error, info, warning',
           );
         });
