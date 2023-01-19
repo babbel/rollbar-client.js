@@ -2,25 +2,16 @@
 import type { configurationDefaults } from './RollbarClientSubmitter.mjs';
 
 // Local Types
-// eslint-disable-next-line @typescript-eslint/ban-types -- only interested in allowing functions not matching their shape
-type TConfigurationObjectValue = string | RegExp | object | boolean | Function;
+type TConfigurationOptionCustom = Omit<IConfigurationOptions, 'accessToken'>;
 
 type TConfigurationOptionsWithDefaults = IConfigurationOptions & typeof configurationDefaults;
 
-type TCustomConfiguration = Omit<
-  IConfigurationOptions,
-  'accessToken' | 'onUnhandledError' | 'onUnhandledPromiseRejection'
-> & {
-  onUnhandledError?: string;
-  onUnhandledPromiseRejection?: string;
+type TConfigurationSerialized<T extends object> = {
+  // eslint-disable-next-line @typescript-eslint/ban-types -- any function can be expected here
+  [key in keyof T]: Exclude<T[key], undefined | false> extends RegExp | Function ? string : T[key];
 };
 
 type TLogLevels = 'critical' | 'debug' | 'error' | 'info' | 'warning';
-
-type TSerializedObject<T extends object> = {
-  // eslint-disable-next-line @typescript-eslint/ban-types -- any function can be expected here
-  [key in keyof T]: T[key] extends Function | RegExp ? string : T[key];
-};
 
 type TSubmitterParameters = [
   TLogLevels,
@@ -72,7 +63,7 @@ interface IPayload {
       reportingMethod: 'fetch' | 'sendBeacon';
       actionHistory?: string;
       applicationState?: string;
-      configuration?: TSerializedObject<TCustomConfiguration>;
+      configuration?: TConfigurationSerialized<TConfigurationOptionCustom>;
       locationInfo?: object;
       [key: string]: unknown;
     };
@@ -94,7 +85,6 @@ interface IPayload {
 export type {
   IConfigurationOptions,
   IPayload,
-  TConfigurationObjectValue,
   TConfigurationOptionsWithDefaults,
   TLogLevels,
   TSubmitterParameters,
