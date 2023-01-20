@@ -30,7 +30,7 @@ interface IConfigurationOptions {
   commitHash?: string;
   customPayloadFields?: object;
   environment: string;
-  fingerprint?: string | false;
+  fingerprint?: false | string;
   hasConfigurationInPayload?: boolean;
   isBrowserSupported?: boolean;
   isVerbose?: boolean;

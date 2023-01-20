@@ -23,13 +23,20 @@ class RollbarClient {
     }
   }
 
-  async log(...parameters: TSubmitterParameters) {
+  // Same as TSubmitterParameters but listed explicitly so end users get better autocomplete
+  async log(
+    logLevel: TSubmitterParameters[0],
+    titleText: TSubmitterParameters[1],
+    error?: TSubmitterParameters[2],
+    applicationState?: TSubmitterParameters[3],
+    actionHistory?: TSubmitterParameters[4],
+  ) {
     if (!this.submitter) {
       // eslint-disable-next-line import/no-unresolved -- false positive of an unimportable package
       const { RollbarClientSubmitter } = await import('./RollbarClientSubmitter.mjs');
       this.submitter = new RollbarClientSubmitter(this.configuration);
     }
-    await this.submitter.report(...parameters);
+    await this.submitter.report(logLevel, titleText, error, applicationState, actionHistory);
   }
 
   onErrorDefault = (errorEvent: ErrorEvent) =>
