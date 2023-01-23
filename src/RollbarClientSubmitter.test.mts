@@ -1,5 +1,5 @@
 // External Imports
-import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi, SpyInstance } from 'vitest';
 import * as ErrorStackParser from 'error-stack-parser';
 
 // Internal Imports
@@ -414,10 +414,12 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           const testMessage = 'test message';
           await submitter.report('error', testMessage);
 
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- TODO: determine how to make Vitest allow calling .mock on mocked functions
-          // @ts-ignore
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access -- see todo above
-          const actualPayload = JSON.parse(navigator.sendBeacon.mock.calls[0][1]) as IPayload;
+          type MockSendBeacon = SpyInstance<
+            Parameters<Navigator['sendBeacon']>,
+            ReturnType<Navigator['sendBeacon']>
+          >;
+          const sendBeaconAsMock = navigator.sendBeacon as unknown as MockSendBeacon;
+          const actualPayload = JSON.parse(sendBeaconAsMock.mock.calls[0][1] as string) as IPayload;
           const actualLibraryVersion = actualPayload.data.notifier.version;
 
           expect(actualLibraryVersion).toBe(expectedlibraryVersion);
