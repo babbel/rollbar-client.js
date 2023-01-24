@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true,
+    "importsNotUsedAsValues": "error",
+    "isolatedModules": true,
+    "module": "es2022",
+    "moduleResolution": "node16",
+    "noErrorTruncation": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "skipLibCheck": true, // TODO: remove this once the underlying Vite bug is fixed: https://github.com/vitejs/vite/issues/11552
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2021"
+  },
+  "include": ["./src/RollbarClient.mts", "./src/RollbarClientSubmitter.mts"]
+}

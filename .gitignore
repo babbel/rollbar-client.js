@@ -4,5 +4,5 @@
 .vscode
 build
 dist
-jestCodeCoverage
 node_modules
+vitestCodeCoverage

@@ -19,7 +19,8 @@ jobs:
 
       # Task execution
       - run: npm run validate:environment
-      - run: npm run build:only
+      - run: npm run build:vite
+      - run: npm run build:types
       # - run: npm publish
       #   env:
       #     NODE_AUTH_TOKEN: ${{ github.token }}

@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["./src/RollbarClient.test.mts", "./src/RollbarClientSubmitter.test.mts"]
+}
