@@ -64,7 +64,7 @@ function getStackFrames(error: Error) {
   }));
 }
 
-function omitFromObject(key: string, object: Record<string, any>) {
+function omitFromObject(key: string, object: Record<string, unknown>) {
   const { [key]: omitted, ...remaining } = object;
   return remaining;
 }
@@ -962,7 +962,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             context,
             custom,
             environment,
-            fingerprint: fingerprint as string, // Always set in buildMinimalPayload()
+            fingerprint: fingerprint!, // Always set in buildMinimalPayload()
             framework,
             language,
             level,

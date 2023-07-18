@@ -18,10 +18,12 @@ type TSubmitterParameters = [
   string,
   Error?,
   object?,
-  Array<{ type: string; payload?: any }>?,
+  IAction[]?,
 ];
 
 // Local Interfaces
+interface IAction { type: string; payload?: unknown };
+
 interface IConfigurationOptions {
   accessToken: string;
   apiUrl?: string;

@@ -26,7 +26,7 @@ vi.mock('./RollbarClientSubmitter', () => {
 });
 
 // Execute Tests
-describe(`Class: ${RollbarClient.name}`, () => {
+describe.only(`Class: ${RollbarClient.name}`, () => {
   beforeAll(() => {
     vi.spyOn(window, 'addEventListener');
   });
