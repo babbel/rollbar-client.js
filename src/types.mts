@@ -1,4 +1,4 @@
-// Local Imports
+// Type Imports
 import type { configurationDefaults } from './RollbarClientSubmitter.mjs';
 
 // Local Types
