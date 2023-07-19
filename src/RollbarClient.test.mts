@@ -3,6 +3,8 @@ import { beforeAll, describe, expect, test, vi } from 'vitest';
 
 // Internal Imports
 import { RollbarClient } from './RollbarClient.mjs';
+
+// Type Imports
 import type { IConfigurationOptions, TSubmitterParameters } from './types.mjs';
 
 // Local Types
@@ -26,7 +28,7 @@ vi.mock('./RollbarClientSubmitter', () => {
 });
 
 // Execute Tests
-describe.only(`Class: ${RollbarClient.name}`, () => {
+describe(`Class: ${RollbarClient.name}`, () => {
   beforeAll(() => {
     vi.spyOn(window, 'addEventListener');
   });

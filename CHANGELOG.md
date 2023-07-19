@@ -3,6 +3,9 @@
 ## 2.0.1
 
 - Refactored code and unit tests to account for significantly updated dependencies
+- Added ESLint rule to require type imports to be in their own group
+- Modified `tsconfig.json` to allow TypeScript file extensions in import strings via rule `allowImportingTsExtensions`
+- Remove unnecessary `jsconfig.json` file
 - Replaced Vitest coverage reporter `c8` with `v8` as necessitated by the migration to Vitest version `0.32.0`
 - `validate:environment` NPM script now executes its subtasks in parallel
 - Update GitHub Action workflow files to use Node.js version `18.16.1`

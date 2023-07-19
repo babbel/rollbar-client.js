@@ -1,11 +1,14 @@
 // External Imports
-import { afterAll, beforeAll, beforeEach, describe, expect, test, vi, SpyInstance } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import * as ErrorStackParser from 'error-stack-parser';
 
 // Internal Imports
 import { name as expectedlibraryName, version as expectedlibraryVersion } from '../package.json';
 import { RollbarClientSubmitter } from './RollbarClientSubmitter.mjs';
+
+// Type Imports
 import type { IConfigurationOptions, IPayload, TLogLevels } from './types.mjs';
+import type { SpyInstance } from 'vitest';
 
 // Local Variables
 const acceptedLogLevels: TLogLevels[] = ['critical', 'debug', 'error', 'info', 'warning'];
@@ -92,8 +95,6 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
       .mockName('consoleWarnMock');
 
     if (typeof navigator.sendBeacon !== 'function') {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- TODO: remove manually setting sendBeacon() once happy-dom supports it natively
-      // @ts-ignore
       navigator.sendBeacon = sendBeaconMock;
     }
     vi.spyOn(navigator, 'sendBeacon').mockImplementation(sendBeaconMock).mockName('sendBeaconMock');

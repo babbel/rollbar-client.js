@@ -13,16 +13,13 @@ type TConfigurationSerialized<T extends object> = {
 
 type TLogLevels = 'critical' | 'debug' | 'error' | 'info' | 'warning';
 
-type TSubmitterParameters = [
-  TLogLevels,
-  string,
-  Error?,
-  object?,
-  IAction[]?,
-];
+type TSubmitterParameters = [TLogLevels, string, Error?, object?, IAction[]?];
 
 // Local Interfaces
-interface IAction { type: string; payload?: unknown };
+interface IAction {
+  type: string;
+  payload?: unknown;
+}
 
 interface IConfigurationOptions {
   accessToken: string;
