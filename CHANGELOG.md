@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.4
+
+- Added the `license` and `repository` fields to `package.json` to improve the presentation of the package on [npmjs.com](https://www.npmjs.com/)
+- Add `LICENSE` MIT open-source license file to the code repository
+- Add `CONTRIBUTING.md` to give guidance to contributors of this repository
+- Add `MAINTAINERS.md` to identify maintainers of this repository
+
 ## 2.0.3
 
 - Add the missing `--access public` flag to the `npm publish` command so package publishing isn't rejected
