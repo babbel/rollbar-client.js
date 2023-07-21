@@ -1,6 +1,6 @@
 # NPM module `@babbel/rollbar-client.js`
 
-Tiny, modern Rollbar JavaScript client whose code is mostly lazy-loaded if and when an error occurs.
+Tiny, modern Rollbar TypeScript client whose code is mostly lazy-loaded if and when an error occurs.
 
 ## Background and Overview
 

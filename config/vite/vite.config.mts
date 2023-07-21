@@ -21,7 +21,7 @@ export default defineConfig({
   test: {
     clearMocks: true,
     coverage: {
-      provider: 'c8',
+      provider: 'v8',
       reportsDirectory: './vitestCodeCoverage',
     },
     environment: 'happy-dom',

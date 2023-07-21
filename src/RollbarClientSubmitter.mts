@@ -85,8 +85,7 @@ function serializeConfigurationObject(configObject: IConfigurationOptions) {
       // eslint-disable-next-line no-continue -- explicitly cast functions and regexes to strings; the default case is to serialize the raw value
       continue;
     }
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- we need serialzdConfigObject as a generic value, otherwise as a union type it'll be considered never
-    (serializedConfigObject[keyWithCast] as typeof serializedConfigObject[typeof keyWithCast]) =
+    (serializedConfigObject[keyWithCast] as (typeof serializedConfigObject)[typeof keyWithCast]) =
       valueWithCast;
   }
   return serializedConfigObject;
@@ -124,7 +123,7 @@ function validateReportArguments(...parameters: TSubmitterParameters) {
 // Class Definition
 class RollbarClientSubmitter {
   configuration: TConfigurationOptionsWithDefaults;
-  errorHistory: Array<object>; // TODO: add more specific object shape
+  errorHistory: object[]; // TODO: add more specific object shape
 
   constructor(configurationOptions: IConfigurationOptions) {
     for (const requiredKey of configurationOptionsRequired) {

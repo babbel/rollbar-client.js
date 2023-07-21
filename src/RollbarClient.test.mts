@@ -3,6 +3,8 @@ import { beforeAll, describe, expect, test, vi } from 'vitest';
 
 // Internal Imports
 import { RollbarClient } from './RollbarClient.mjs';
+
+// Type Imports
 import type { IConfigurationOptions, TSubmitterParameters } from './types.mjs';
 
 // Local Types

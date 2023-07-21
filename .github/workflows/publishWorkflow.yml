@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: "16.17.0"
+          node-version: "18.16.1"
           registry-url: https://npm.pkg.github.com
       - id: super-cache
         uses: mangs/super-cache-action@v3
@@ -26,4 +26,4 @@ jobs:
       #     NODE_AUTH_TOKEN: ${{ github.token }}
       - uses: mangs/simple-release-notes-action@v2
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

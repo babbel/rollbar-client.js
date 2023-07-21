@@ -1,4 +1,4 @@
-// Local Imports
+// Type Imports
 import type { configurationDefaults } from './RollbarClientSubmitter.mjs';
 
 // Local Types
@@ -13,15 +13,14 @@ type TConfigurationSerialized<T extends object> = {
 
 type TLogLevels = 'critical' | 'debug' | 'error' | 'info' | 'warning';
 
-type TSubmitterParameters = [
-  TLogLevels,
-  string,
-  Error?,
-  object?,
-  Array<{ type: string; payload?: any }>?,
-];
+type TSubmitterParameters = [TLogLevels, string, Error?, object?, IAction[]?];
 
 // Local Interfaces
+interface IAction {
+  type: string;
+  payload?: unknown;
+}
+
 interface IConfigurationOptions {
   accessToken: string;
   apiUrl?: string;

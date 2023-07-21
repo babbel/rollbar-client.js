@@ -37,7 +37,9 @@
       {
         "groups": [
           ["builtin", "external"],
-          ["internal", "unknown", "parent", "sibling", "index", "object", "type"]
+          ["internal", "unknown", "parent", "sibling", "index"],
+          ["type"],
+          ["object"]
         ],
         "newlines-between": "always"
       }

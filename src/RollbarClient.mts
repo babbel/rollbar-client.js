@@ -1,4 +1,4 @@
-// Internal Imports
+// Type Imports
 import type { IConfigurationOptions, TSubmitterParameters } from './types.mjs';
 import type { RollbarClientSubmitter } from './RollbarClientSubmitter.mjs';
 
