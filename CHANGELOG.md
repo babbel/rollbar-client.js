@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.2
+
+- Enable publishing to the NPM registry
+
 ## 2.0.1
 
 - Refactored code and unit tests to account for significantly updated dependencies
