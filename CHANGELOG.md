@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.3
+
+- Add the missing `--access public` flag to the `npm publish` command so package publishing isn't rejected
+
 ## 2.0.2
 
 - Enable publishing to the NPM registry
