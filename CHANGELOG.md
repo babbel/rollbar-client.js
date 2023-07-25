@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.5
+
+- Added NPM script `validate:types` to `package.json` which uses package `@arethetypeswrong/cli` to validate that the TypeScript types published with this package are usable by consumers of this package
+- Update dependencies to latest
+
 ## 2.0.4
 
 - Added the `license` and `repository` fields to `package.json` to improve the presentation of the package on [npmjs.com](https://www.npmjs.com/)

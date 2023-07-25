@@ -22,3 +22,4 @@ jobs:
       - run: npm run test:unit
       - run: npm run build:vite
       - run: npm run build:types
+      - run: npm run validate:types
