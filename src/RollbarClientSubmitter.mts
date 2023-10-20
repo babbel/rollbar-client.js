@@ -27,7 +27,9 @@ const libraryVersion = process.env['npm_package_version'];
 function buildEnumerableObject(targetObject: Error) {
   const enumerableObject: Record<string, string | Error> = {};
   for (const key of Object.getOwnPropertyNames(targetObject)) {
-    enumerableObject[key] = (targetObject as Required<Error>)[key as keyof Error];
+    const value = (targetObject as Required<Error>)[key as keyof Error];
+    enumerableObject[key] =
+      typeof value === 'string' || value instanceof Error ? value : String(value);
   }
   return enumerableObject;
 }

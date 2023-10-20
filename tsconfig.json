@@ -7,7 +7,7 @@
     "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "module": "es2022",
+    "module": "node16",
     "moduleResolution": "node16",
     "noErrorTruncation": true,
     "noFallthroughCasesInSwitch": true,
@@ -22,7 +22,7 @@
     "skipLibCheck": true, // TODO: remove this once the underlying Vite bug is fixed: https://github.com/vitejs/vite/issues/11552
     "sourceMap": true,
     "strict": true,
-    "target": "es2021",
+    "target": "es2022",
     "verbatimModuleSyntax": true
   },
   "include": ["./src/RollbarClient.mts", "./src/RollbarClientSubmitter.mts"]
