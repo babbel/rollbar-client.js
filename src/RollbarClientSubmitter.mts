@@ -18,6 +18,7 @@ const configurationDefaults = {
   isBrowserSupported: true,
   isVerbose: true,
   setContext: () => window.location.href,
+  transform: () => {}
 };
 const configurationOptionsRequired = ['accessToken', 'environment'];
 const libraryName = process.env['npm_package_name'];
@@ -251,11 +252,14 @@ class RollbarClientSubmitter {
     const payload = this.buildPayload(...parameters);
 
     // Bail out of reporting if shouldIgnoreOccurrence() returns a truthy value
-    const { apiUrl, shouldIgnoreOccurrence } = this.configuration;
+    const { apiUrl, transform, shouldIgnoreOccurrence } = this.configuration;
     if (shouldIgnoreOccurrence && shouldIgnoreOccurrence(payload, this.configuration)) {
       console.info('[ROLLBAR CLIENT] Ignoring occurrence', payload, this.configuration);
       return;
     }
+
+    // Allows consumers to mutate the payload similarly to official client
+    transform(payload.data, this.configuration);
 
     // Submit occurrence to Rollbar
     await submitOccurrence(apiUrl, payload);
