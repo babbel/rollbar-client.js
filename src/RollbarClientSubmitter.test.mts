@@ -932,12 +932,12 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(navigator.sendBeacon).toHaveBeenCalledTimes(0);
         });
 
-        test('transform', () => {
+        test('transform', async () => {
           function setContext() {
             return window.location.href;
           }
-          const transform = vi.fn().mockImplementation((payload) => {
-            // eslint-disable-next-line no-param-reassign -- API from official Rollbar client
+          const transform = vi.fn().mockImplementation((payload: IPayload['data'] & { body: { trace: { frames: [{ filename: string }]}}}) => {
+            // eslint-disable-next-line no-param-reassign -- API choice from official Rollbar client
             payload.body.trace.frames[0].filename = 'https://mocked-domain.com/test.js';
           });
           const rollbarConfiguration = {
@@ -954,9 +954,10 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           const payload = buildMinimalPayload();
 
           submitter = new RollbarClientSubmitter(rollbarConfiguration);
-          submitter.report('error', 'test message', new Error('test error'));
+          await submitter.report('error', 'test message', new Error('test error'));
 
           expect(transform).toHaveBeenCalledWith(
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- body is unimportant to this expect, so any is ok
             expect.objectContaining({ ...payload.data, body: expect.anything() }),
             rollbarConfiguration,
           );

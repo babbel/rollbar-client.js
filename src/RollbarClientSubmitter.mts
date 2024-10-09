@@ -18,7 +18,7 @@ const configurationDefaults = {
   isBrowserSupported: true,
   isVerbose: true,
   setContext: () => window.location.href,
-  transform: () => {}
+  transform: (() => {}) as Required<IConfigurationOptions>['transform']
 };
 const configurationOptionsRequired = ['accessToken', 'environment'];
 const libraryName = process.env['npm_package_name'];
