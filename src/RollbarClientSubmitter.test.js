@@ -793,6 +793,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
               onUnhandledPromiseRejection: onUnhandledPromiseRejection.toString(),
               setContext: setContext.toString(),
               shouldIgnoreOccurrence: shouldIgnoreOccurrence.toString(),
+              transform: submitter.configuration.transform.toString(),
             },
             isBrowserSupported,
             languagePreferred,
@@ -885,6 +886,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             isVerbose: true,
             setContext,
             shouldIgnoreOccurrence,
+            transform: () => {},
           };
           submitter = new RollbarClientSubmitter(rollbarConfiguration);
           submitter.report('error', testMessage);
@@ -905,6 +907,44 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           expect(window.fetch).toHaveBeenCalledTimes(0);
           expect(navigator.sendBeacon).toHaveBeenCalledTimes(0);
         });
+
+        test('transform', () => {
+          function setContext() {
+            return window.location.href;
+          }
+          const transform = jest.fn().mockImplementation((payload) => {
+            // eslint-disable-next-line no-param-reassign -- API from official Rollbar client
+            payload.body.trace.frames[0].filename = 'https://mocked-domain.com/test.js';
+          });
+          const rollbarConfiguration = {
+            ...minimalCorrectConfig,
+            apiUrl: defaultApiUrl,
+            browserUnsupportedTitlePrefix: '[UNSUPPORTED BROWSER] ',
+            customPayloadFields: {},
+            hasConfigurationInPayload: false,
+            isBrowserSupported: true,
+            isVerbose: true,
+            setContext,
+            transform,
+          };
+          const payload = buildMinimalPayload();
+          delete payload.data.body;
+
+          submitter = new RollbarClientSubmitter(rollbarConfiguration);
+          submitter.report('error', 'test message', new Error('test error'));
+
+          expect(transform).toHaveBeenCalledWith(
+            expect.objectContaining(payload.data),
+            rollbarConfiguration,
+          );
+          expect(window.fetch).toHaveBeenCalledTimes(0);
+          expect(navigator.sendBeacon).toHaveBeenCalledTimes(1);
+          expect(navigator.sendBeacon).toHaveBeenCalledWith(
+            defaultApiUrl,
+            expect.stringContaining('"filename":"https://mocked-domain.com/test.js"'),
+          );
+        });
+
 
         test('userInfo', () => {
           const userInfo = {
