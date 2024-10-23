@@ -2,7 +2,7 @@
 
 ## 2.1.0
 
-- Adds transform configuration option to allow consumers to transform the payload before sending it
+- Adds transformPayload configuration option to allow consumers to transform the payload before sending it
 
 ## 2.0.6
 
