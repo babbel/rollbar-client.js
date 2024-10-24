@@ -817,6 +817,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
               onUnhandledPromiseRejection: onUnhandledPromiseRejection.toString(),
               setContext: setContext.toString(),
               shouldIgnoreOccurrence: shouldIgnoreOccurrence.toString(),
+              transformPayload: submitter.configuration.transformPayload.toString(),
             },
             isBrowserSupported,
             languagePreferred,
@@ -909,6 +910,7 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
             isVerbose: true,
             setContext,
             shouldIgnoreOccurrence,
+            transformPayload: () => {},
           };
           submitter = new RollbarClientSubmitter(rollbarConfiguration);
           await submitter.report('error', testMessage);
@@ -928,6 +930,49 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
           );
           expect(window.fetch).toHaveBeenCalledTimes(0);
           expect(navigator.sendBeacon).toHaveBeenCalledTimes(0);
+        });
+
+        test('transformPayload', async () => {
+          function setContext() {
+            return window.location.href;
+          }
+          const transformPayload = vi
+            .fn()
+            .mockImplementation(
+              (
+                payload: IPayload['data'] & { body: { trace: { frames: [{ filename: string }] } } },
+              ) => {
+                // eslint-disable-next-line no-param-reassign -- API choice from official Rollbar client
+                payload.body.trace.frames[0].filename = 'https://mocked-domain.com/test.js';
+              },
+            );
+          const rollbarConfiguration = {
+            ...minimalCorrectConfig,
+            apiUrl: defaultApiUrl,
+            browserUnsupportedTitlePrefix: '[UNSUPPORTED BROWSER] ',
+            customPayloadFields: {},
+            hasConfigurationInPayload: false,
+            isBrowserSupported: true,
+            isVerbose: true,
+            setContext,
+            transformPayload,
+          };
+          const payload = buildMinimalPayload();
+
+          submitter = new RollbarClientSubmitter(rollbarConfiguration);
+          await submitter.report('error', 'test message', new Error('test error'));
+
+          expect(transformPayload).toHaveBeenCalledWith(
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- body is unimportant to this expect, so any is ok
+            expect.objectContaining({ ...payload.data, body: expect.anything() }),
+            rollbarConfiguration,
+          );
+          expect(window.fetch).toHaveBeenCalledTimes(0);
+          expect(navigator.sendBeacon).toHaveBeenCalledTimes(1);
+          expect(navigator.sendBeacon).toHaveBeenCalledWith(
+            defaultApiUrl,
+            expect.stringContaining('"filename":"https://mocked-domain.com/test.js"'),
+          );
         });
 
         test('userInfo', async () => {

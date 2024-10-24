@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0
+
+- Adds transformPayload configuration option to allow consumers to transform the payload before sending it
+
 ## 2.0.6
 
 - Fix broken link in readme to Rollbar API documentation

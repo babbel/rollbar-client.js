@@ -38,6 +38,7 @@ interface IConfigurationOptions {
   onUnhandledPromiseRejection?: false | ((promiseRejectionEvent: PromiseRejectionEvent) => void);
   setContext?: () => string;
   shouldIgnoreOccurrence?: (payload: IPayload, configuration: IConfigurationOptions) => boolean;
+  transformPayload?: (payload: IPayload['data'], configuration: IConfigurationOptions) => void;
   userInfo?: object;
 }
 
