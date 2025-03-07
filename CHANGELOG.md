@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.1
+
+- Updated publish workflow's way of retrieving secrets
+
 ## 2.1.0
 
 - Adds transformPayload configuration option to allow consumers to transform the payload before sending it
