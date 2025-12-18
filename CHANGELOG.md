@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.2
+
+- Updated publish workflow to use OIDC.
+
 ## 2.1.1
 
 - Updated publish workflow's way of retrieving secrets

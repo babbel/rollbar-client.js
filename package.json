@@ -1,6 +1,6 @@
 {
   "name": "@babbel/rollbar-client.js",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "author": "Eric L. Goldstein <egoldstein@babbel.com>",
   "description": "Tiny, modern Rollbar TypeScript client whose code is mostly lazy-loaded if and when an error occurs",
   "license": "MIT",
