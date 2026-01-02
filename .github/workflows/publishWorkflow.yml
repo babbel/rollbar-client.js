@@ -11,18 +11,10 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: "18.16.1"
           registry-url: https://registry.npmjs.org
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}
-      - uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          parse-json-secrets: true
-          secret-ids: NPM_USER,${{ vars.NPM_USER_SECRET_ARN }}
       - id: super-cache
         uses: mangs/super-cache-action@v3
       - if: steps.super-cache.outputs.cache-hit != 'true'
@@ -35,6 +27,5 @@ jobs:
       - uses: mangs/simple-release-notes-action@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+      # authenticate by OIDC
       - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ env.NPM_USER_ACCESS_TOKEN }}
