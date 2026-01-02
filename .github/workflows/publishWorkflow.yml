@@ -15,12 +15,9 @@ jobs:
         with:
           node-version: "18.16.1"
           registry-url: https://registry.npmjs.org
-      - id: super-cache
-        uses: mangs/super-cache-action@v3
-      - if: steps.super-cache.outputs.cache-hit != 'true'
-        run: npm ci
 
       # Task execution
+      - run: npm ci
       - run: npm run validate:environment
       - run: npm run build:vite
       - run: npm run build:types
