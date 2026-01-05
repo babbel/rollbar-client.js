@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v4
         with:
-          node-version: "18.16.1"
+          node-version: 24
           registry-url: https://registry.npmjs.org
       - id: super-cache
         uses: mangs/super-cache-action@v3
@@ -28,4 +28,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       # authenticate by OIDC
-      - run: npm publish --access public
+      - run: NODE_AUTH_TOKEN="" npm publish --access public
