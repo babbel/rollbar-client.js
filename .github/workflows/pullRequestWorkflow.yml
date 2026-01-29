@@ -5,10 +5,10 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: "18.16.1"
+          node-version: "24.13.0"
           registry-url: https://npm.pkg.github.com
       - id: super-cache
         uses: mangs/super-cache-action@v3

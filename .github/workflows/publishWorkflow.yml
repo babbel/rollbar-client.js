@@ -10,10 +10,10 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: "24.13.0"
           registry-url: https://registry.npmjs.org
       - id: super-cache
         uses: mangs/super-cache-action@v3
@@ -24,8 +24,7 @@ jobs:
       - run: npm run validate:environment
       - run: npm run build:vite
       - run: npm run build:types
-      - uses: mangs/simple-release-notes-action@v2
+      - uses: mangs/simple-release-notes-action@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      # authenticate by OIDC
-      - run: NODE_AUTH_TOKEN="" npm publish --access public
+      - run: NODE_AUTH_TOKEN="" npm publish --access public # Authenticate via OIDC

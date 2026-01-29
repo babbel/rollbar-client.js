@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.3
+
+- Create lockfile using Node.js version `24.13.0`
+- Upgrade GitHub Actions workflows to use `actions/checkout@v6`, `actions/setup-node@v6`, and `mangs/simple-release-notes-action@v3`
+
 ## 2.1.2
 
 - Updated publish workflow to use OIDC.
