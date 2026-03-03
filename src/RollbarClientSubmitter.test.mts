@@ -425,6 +425,35 @@ describe(`Class: ${RollbarClientSubmitter.name}`, () => {
 
           expect(actualLibraryVersion).toBe(expectedlibraryVersion);
         });
+
+        test('error object with non-parseable stack trace passed', async () => {
+          const testErrorMessage = 'test error';
+          const testError = new TypeError(testErrorMessage);
+          const testMessage = 'test message';
+          delete testError.stack;
+          await submitter.report('error', testMessage, testError);
+
+          const payload = buildMinimalPayload();
+          payload.data.body = {
+            trace: {
+              exception: {
+                class: 'TypeError',
+                description: testMessage,
+                message: testErrorMessage,
+                raw: String(testError),
+                stack: testError.stack,
+              },
+              frames: [],
+            },
+          };
+          payload.data.custom = {
+            ...payload.data.custom,
+          };
+
+          expect(window.fetch).toHaveBeenCalledTimes(0);
+          expect(navigator.sendBeacon).toHaveBeenCalledTimes(1);
+          expect(navigator.sendBeacon).toHaveBeenCalledWith(defaultApiUrl, JSON.stringify(payload));
+        });
       });
 
       describe('Configuration options', () => {
