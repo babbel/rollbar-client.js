@@ -47,12 +47,16 @@ function buildObjectDeepSorted<T extends object>(targetValue: T): T {
 }
 
 function getStackFrames(error: Error) {
-  return ErrorStackParser.parse(error).map((frame) => ({
-    colno: frame.columnNumber,
-    filename: frame.fileName,
-    lineno: frame.lineNumber,
-    method: frame.functionName,
-  }));
+  try {
+    return ErrorStackParser.parse(error).map((frame) => ({
+      colno: frame.columnNumber,
+      filename: frame.fileName,
+      lineno: frame.lineNumber,
+      method: frame.functionName,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 function logToConsole(...parameters: TSubmitterParameters) {
