@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.3
+
+- Stop throwing errors when encountering a non-parseable stack trace, default to empty frames array instead
+
 ## 2.1.2
 
 - Updated publish workflow to use OIDC.
